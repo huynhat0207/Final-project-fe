@@ -25,6 +25,7 @@ import DescriptivePage from "./features/tutorial/analysis/descriptive/index.jsx"
 import { Box } from "@mui/material";
 import Layout from "./components/Layout.jsx";
 import Overview from "./components/Dashboard/Overview.jsx"
+import Dashboard from "./components/Dashboard/Dashboard.jsx"
 
 function Logout() {
   localStorage.clear()
@@ -41,12 +42,8 @@ function App() {
   const [excelData, setExcelData] = useState(null);
   const [pageLocation, setPageLocation] = useState('home')
   const location = useLocation();
-  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    // execute on location change
-    // setCount(count + 1);
-    // console.log('Location changed!', location.pathname);
     if (location === '/home')
       setPageLocation('home');
     else setPageLocation('main');
@@ -54,6 +51,7 @@ function App() {
 
   const mainList = [
     { path: '/overview', element: <Overview /> },
+    { path: '/dashboard', element: <Dashboard /> },
   ];
   const userList = [
     { path: 'profile', element: <Profile /> },

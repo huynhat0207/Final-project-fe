@@ -5,13 +5,24 @@ import logo from '../Img/justLogo.png'
 import AvatarDropdown from './Dropdown.jsx'
 import { useAuth } from '../Auth/AuthContext.js';
 import Button from '@mui/material/Button';
-// import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-// import { useState, useEffect } from 'react';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 const Header = () => {
     const location = useLocation();
     const { isAuthorized } = useAuth();
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     if (!isAuthorized) {
     return (
         <header className='bg-blue-950 p-0'>
@@ -102,11 +113,10 @@ const Header = () => {
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>SURVEY</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
-                
-                <Button>
-                    <NotificationsActiveIcon/>
-                </Button>
-                <AvatarDropdown/>
+                    <Button>
+                        <NotificationsActiveIcon/>
+                    </Button>
+                    <AvatarDropdown/>
                 </div>
             </nav>
         </header>
@@ -128,13 +138,36 @@ const Header = () => {
                     </Link>
                 
                 </div>
+                <div className='flex self-stretch justify-between'>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./overview'}}>Overview</Button>
+                    <Button variant="text"
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    disableElevation
+                    onClick={handleClick}
+                    endIcon={<KeyboardArrowDownIcon />}
+                    sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}
+                    >
+                        Analysis
+                    </Button>
+                    <Menu
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                    }}
+                    >
+                    <MenuItem onClick={handleClose}>RFM Analysis</MenuItem>
+                    </Menu>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./dashboard'}}>Dashboard</Button>
+                </div>
                 <div className="flex flex-1 justify-end">
-                
-                
-                <Button>
-                    <NotificationsActiveIcon/>
-                </Button>
-                <AvatarDropdown/>
+                    <Button>
+                        <NotificationsActiveIcon/>
+                    </Button>
+                    <AvatarDropdown/>
                 </div>
             </nav>
         </header>

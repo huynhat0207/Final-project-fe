@@ -23,6 +23,7 @@ module.exports = {
         656: '656px',
         880: '880px',
         508: '508px',
+        '80vw': '80vw',
       },
       height: {
         80: '80px',
@@ -38,6 +39,7 @@ module.exports = {
         685: '685px',
         800: '800px',
         '90vh': '90vh',
+        
       },
       minWidth: {
         210: '210px',
@@ -57,6 +59,7 @@ module.exports = {
         'logo-color': '#38bdf8',
         'header-color': '#0f172a',
         'pinkish-purple': 'rgba(214, 0, 141, 0.64)',
+        'light-blue': 'rgba(138,215,224,255)',
         green: 'green',
         orange: 'orange',
         red: 'red',
