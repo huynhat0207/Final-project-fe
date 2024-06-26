@@ -1,0 +1,117 @@
+.div {
+    background-color: var(--White, #fff);
+    display: flex;
+    flex-direction: column;
+    padding: 21px 80px 59px;
+  }
+  @media (max-width: 991px) {
+    .div {
+      padding: 0 20px;
+    }
+  }
+  .div-2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: #0048ff;
+    font-weight: 400;
+    margin: 0 21px;
+  }
+  @media (max-width: 991px) {
+    .div-2 {
+      max-width: 100%;
+      margin-right: 10px;
+      flex-wrap: wrap;
+    }
+  }
+  .div-3 {
+    align-self: stretch;
+    display: flex;
+    gap: 11px;
+    font-size: 33px;
+    color: var(--High-contrast, #21717a);
+    white-space: nowrap;
+    letter-spacing: 0.66px;
+  }
+  @media (max-width: 991px) {
+    .div-3 {
+      white-space: initial;
+    }
+  }
+  .img {
+    aspect-ratio: 2.08;
+    object-fit: auto;
+    object-position: center;
+    width: 146px;
+    align-self: stretch;
+    max-width: 100%;
+  }
+  .div-5 {
+    align-self: stretch;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 18px;
+    line-height: 133%;
+    margin: auto 0;
+  }
+  @media (max-width: 991px) {
+    .div-5 {
+      max-width: 100%;
+      flex-wrap: wrap;
+    }
+  }
+  .header-main {
+    background: linear-gradient(to right, white, #BACAEE, white);
+    border-bottom: 1px solid #002B9A;
+    // border: rgba(0, 43, 154, 1), solid, 1px;
+  }
+  .div-10 {
+    justify-content: center;
+    border-radius: 4px;
+    border-color: rgba(0, 72, 255, 1);
+    border-style: solid;
+    border-width: 1px;
+    align-self: stretch;
+    white-space: nowrap;
+    text-align: center;
+    margin: auto 0;
+    padding: 11px 27px;
+    font: 16px/131% Work Sans, -apple-system, Roboto, Helvetica,
+      sans-serif;
+  }
+  @media (max-width: 991px) {
+    .div-10 {
+      white-space: initial;
+      padding: 0 20px;
+    }
+  }
+  .avatar{
+    aspect-ratio: 2.08;
+          object-fit: auto;
+          object-position: center;
+          width: 146px;
+          max-width: 100%;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  .btn {
+    border: none;
+    background-color: inherit;
+    padding: 14px 28px;
+    font-size: 20px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Work Sans, sans-serif;
+    flex-grow: 1;
+    color: dodgerblue;
+    
+  }

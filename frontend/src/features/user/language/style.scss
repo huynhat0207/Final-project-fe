@@ -1,0 +1,13 @@
+.mylanguage {
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+}
+.h2-language {
+  font-family: Roboto, sans-serif;
+  flex-grow: 1;
+  flex-basis: auto;
+  margin: auto 0;
+  color: #0048FF;
+  font-weight: bold;
+}

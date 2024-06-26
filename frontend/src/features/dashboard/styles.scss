@@ -1,0 +1,45 @@
+.btn {
+    border: none;
+    background-color: inherit;
+    padding: 14px 28px;
+    font-size: 20px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Work Sans, sans-serif;
+    flex-grow: 1;
+    color: dodgerblue;
+    
+  }
+  .option-features{
+    display: flex;
+    padding-top: 30px;
+  }
+.main-container{
+  padding:10px 0 0 5vw;
+}
+
+.h2-text{
+  color: #0048ff;
+  max-width: 128px;
+  padding-top: 20px;
+  font: 700 28px/129% Work Sans, -apple-system, Roboto, Helvetica, sans-serif;
+}
+.NavItem.Mui-selected {
+  text-decoration: underline;
+}
+
+.classifi-value {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+  font-size: 18px;
+  color: #0048ff;
+  font-weight: 400;
+  line-height: 133%;
+  padding: 20px 20px;
+}
+.var-item{
+  font-family: Work Sans, sans-serif;
+  flex-grow: 1;
+  flex-basis: auto;
+}
