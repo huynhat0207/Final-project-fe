@@ -2,9 +2,10 @@ import { useState } from "react";
 import api from "./api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
-import LoadingIndicator from "./LoadingIndicator";
+// import LoadingIndicator from "./LoadingIndicator";
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import CircularProgress from '@mui/material/CircularProgress';
 import { getCLS } from "web-vitals";
 
 function evaluatePasswordStrength(password) {
@@ -48,12 +49,12 @@ function Form({ route, method }) {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         if (!emailRegex.test(email)) {
-            setErrorMessage('Email không hợp lệ!');
+            setErrorMessage('Invalid email.');
             return;
         }
 
         if (!passwordRegex.test(password)) {
-            setErrorMessage('Mật khẩu không hợp lệ!');
+            setErrorMessage('Invalid password.');
             return;
         }
         setLoading(true);
@@ -64,24 +65,24 @@ function Form({ route, method }) {
                 localStorage.setItem(ACCESS_TOKEN, res.data.access);
                 localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
                 setIsAuthorized(true);
-                navigate("/calculate")
+                navigate("/overview")
             } else {
                 navigate("/login")
             }
         } catch (error) {
             console.log(error);
-            setErrorMessage('Tên đăng nhập hoặc mật khẩu không đúng!');
+            setErrorMessage('Username or password incorrect.');
         } finally {
             setLoading(false)
         }
     };
     if (name === "Login") {
         return (
-            <div className="block items-center text-center bg-slate-200 pt-28">
+            <div className="block items-center text-center bg-slate-200 pt-28 h-100vh">
                 <header className="text-vivid-blue text-6xl font-sans">Sign in</header>
                 <div className="text-vivid-blue mt-4 font-sans">Sign in and start your work!</div>
                 <form onSubmit={handleSubmit} >
-                    <div>
+                    <div>   
                         <label htmlFor="email" className="absolute w-px h-px p-0 truncate">Enter Email</label>
                         <input
                             id="email"
@@ -103,9 +104,10 @@ function Form({ route, method }) {
                             onChange={handlePasswordChange}
                         />
                     </div>
-                    {loading && <LoadingIndicator />}
                     {errorMessage && <p className="text-red-600">{errorMessage}</p>}
-                    <button className="w-72 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple capitalize text-white text-xl font-medium" type="submit">Login</button>
+                    {loading? <button className="w-72 h-14 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple" disabled><CircularProgress sx={{color:"white"}} size={30}/></button>: 
+                        <button className="w-72 h-14 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple capitalize text-white text-xl font-medium" type="submit">Sign in</button>
+                    }
                 </form>
                 <div className="text-vivid-blue mt-4">
                     <Link to="/register">Don’t have an account?</Link>
@@ -114,13 +116,16 @@ function Form({ route, method }) {
                     <span className="text-vivid-blue mt-4" >Forgot password? </span>
                     <Link to="/register" style={{ fontSize: 18 }}>Sign up</Link>
                 </div>
-                <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/7cb08ccd3d75cd9302262765155183963ba140f9795f48a3ba8f472b701079f7?apiKey=afa45b72ad7c46798aa3d2761c2357ac&" alt="Sign in visual representation" className="w-full self-stretch mt-28" />
+                <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/7cb08ccd3d75cd9302262765155183963ba140f9795f48a3ba8f472b701079f7?apiKey=afa45b72ad7c46798aa3d2761c2357ac&"
+                    alt="Sign in visual representation" 
+                    className=" absolute w-full self-stretch bottom-0" 
+                />
             </div>
         );
     }
 
     return (
-        <div className="block items-center text-center bg-slate-200 pt-28">
+        <div className="block items-center text-center bg-slate-200 pt-28 h-100vh">
             <header className="text-vivid-blue text-6xl font-sans">Sign up</header>
             <div className="text-vivid-blue mt-4 font-sans">Create your account!</div>
             <form onSubmit={handleSubmit} >
@@ -146,15 +151,19 @@ function Form({ route, method }) {
                         onChange={handlePasswordChange}
                     />
                 </div>
-                {loading && <LoadingIndicator />}
                 {errorMessage && <p className="text-red-600">{errorMessage}</p>}
                 {<p className={getColor(passwordStrength)}>Password strength: {passwordStrength}</p>}
-                <button className="w-72 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple capitalize text-white text-xl font-medium" type="submit">Sign up</button>
+                {loading? <button className="w-72 h-14 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple" disabled><CircularProgress sx={{color:"white"}} size={30}/></button>: 
+                        <button className="w-72 h-14 p-3 mt-5 max-w-full border rounded-lg bg-pinkish-purple capitalize text-white text-xl font-medium" type="submit">Sign up</button>
+                }
             </form>
             <div className="text-vivid-blue mt-4">
                 <Link to="/login">Have an account?</Link>
             </div>
-            <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/7cb08ccd3d75cd9302262765155183963ba140f9795f48a3ba8f472b701079f7?apiKey=afa45b72ad7c46798aa3d2761c2357ac&" alt="Sign in visual representation" className="w-full self-stretch mt-28" />
+            <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/7cb08ccd3d75cd9302262765155183963ba140f9795f48a3ba8f472b701079f7?apiKey=afa45b72ad7c46798aa3d2761c2357ac&"
+                alt="Sign in visual representation" 
+                className=" absolute w-full self-stretch bottom-0" 
+            />
         </div>
     );
 }

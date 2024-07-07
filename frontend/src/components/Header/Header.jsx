@@ -9,7 +9,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 const Header = () => {
     const location = useLocation();
     const { isAuthorized } = useAuth();
@@ -26,7 +26,7 @@ const Header = () => {
     if (!isAuthorized) {
     return (
         <header className='bg-blue-950 p-0'>
-            <nav className='mx-auto flex items-center justify-between p-6 max-w-7xl '>
+            <nav className='mx-auto flex items-center justify-between p-6 max-w-7xl'>
                 <div className='flex lg:flex-1'>
                     <Link to="/home" className="-m-1.5 p-1.5 flex flex-row">
                     <img
@@ -35,13 +35,13 @@ const Header = () => {
                         alt="Company Logo"
                         className="h-8 w-auto"
                     />
-                    <span className='text-xl p-0.5 font-bold bg-'>
+                    <span className='text-xl p-0.5 font-bold'>
                         Data&Retailers
                     </span>
                     </Link>
                 
                 </div>
-                <div className='flex self-stretch justify-between'>
+                <div className='hidden lg:flex self-stretch justify-between'>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={() => {
                             const element = document.getElementById('my-section');
                             element?.scrollIntoView({
@@ -73,7 +73,6 @@ const Header = () => {
         </header>
     )}
     else if (location.pathname === '/home') {
-        console.group("I'm home")
     return (
         <header className='bg-blue-950 p-0'>
             <nav className='mx-auto flex items-center justify-between p-6 max-w-7xl '>
@@ -91,7 +90,7 @@ const Header = () => {
                     </Link>
                 
                 </div>
-                <div className='flex self-stretch justify-between'>
+                <div className='hidden lg:flex self-stretch justify-between'>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={() => {
                             const element = document.getElementById('my-section');
                             element?.scrollIntoView({
@@ -113,8 +112,14 @@ const Header = () => {
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>SURVEY</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
+                    <Button 
+                    variant="contained"
+                    endIcon={<ArrowForwardIosIcon />}
+                    onClick={()=>{window.location.href="./overview"}}>
+                        Go for analysis
+                    </Button>
                     <Button>
-                        <NotificationsActiveIcon/>
+                        <NotificationsActiveIcon sx={{width:30, height: 30}}/>
                     </Button>
                     <AvatarDropdown/>
                 </div>
@@ -162,10 +167,11 @@ const Header = () => {
                     <MenuItem onClick={handleClose}>RFM Analysis</MenuItem>
                     </Menu>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./dashboard'}}>Dashboard</Button>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>Support</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
                     <Button>
-                        <NotificationsActiveIcon/>
+                        <NotificationsActiveIcon sx={{width:30, height: 30}} />
                     </Button>
                     <AvatarDropdown/>
                 </div>

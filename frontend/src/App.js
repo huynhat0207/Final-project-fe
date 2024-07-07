@@ -24,8 +24,8 @@ import GetStarted from "./features/tutorial/getstarted/first/index.jsx";
 import DescriptivePage from "./features/tutorial/analysis/descriptive/index.jsx";
 import { Box } from "@mui/material";
 import Layout from "./components/Layout.jsx";
-import Overview from "./components/Dashboard/Overview.jsx"
-import Dashboard from "./components/Dashboard/Dashboard.jsx"
+import Overview from "./components/WorkPlace/Overview.jsx"
+import Dashboard from "./components/WorkPlace/Dashboard.jsx"
 
 function Logout() {
   localStorage.clear()
@@ -67,7 +67,7 @@ function App() {
   ];
   return (
     <AuthProvider>
-      <Box className="w-screen">
+      <Box className="w-screen bg-slate-200">
       {/* <Header currentPage={pageLocation} />  */}
       <Routes>
         <Route path="/login" element={<SignIn />} />
