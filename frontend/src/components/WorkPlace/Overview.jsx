@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom';
+import {Form, Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ExcelLogo from '../Img/icons8-excel-48.png';
-import TxtLogo from '../Img/icons8-txt-50.png';
 import PreviewIcon from '@mui/icons-material/Preview';
 import EditIcon from '@mui/icons-material/Edit';
 import GetBackToTopButton from '../GetBackToTopButton';
@@ -14,23 +12,48 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Select from 'react-select'
 import CircularProgress from '@mui/material/CircularProgress';
 import HomeIcon from '@mui/icons-material/Home';
 import LoadingDot from '../Animation/LoadingDot';
 import { DataGrid } from '@mui/x-data-grid';
-import { create } from '@mui/material/styles/createTransitions';
-// import { Home } from '@mui/icons-material';
+import Papa from "papaparse";
+import { loadData, getData } from '../Service/dataService';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import {default as SelectReact} from 'react-select'
+import { Input } from '@mui/material';
+import { useTimeout } from '@mui/x-data-grid/internals';
+// import Select from 'react-select'
+// import Select from '@mui/material/Select';
 
 function Overview() {
+  const [data, setData] = useState([]);
+  const [columnTest, setColumnTest] = useState([]);
+  const [isReady, setIsReady] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isUpload, setIsUpload] = useState(false);
+  const allowedExtensions = ["csv"];
   // Define state
-  const [isUpload, setIsUpload] = useState(true); //Test file is upload here
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [file, setFile] = useState("");
+  const [type, setType] = useState("");
   // Sample state
   const [rows, setRows] = useState([
     createData("id", "Transaction ID"),
     createData("date", "Date"),
   ]);
+  // const [columnTest, setColumnTest] = useState([]);
   // Define Ref
   const excelFileInputRef = useRef();
   const textFileInputRef = useRef();
@@ -89,6 +112,12 @@ function Overview() {
       "Other": {field: 'Other', headerName:"Other", width: 130},
   };
   // Funtion
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
   function createData(name, systemfield) {
     return { name, systemfield};
   };
@@ -103,29 +132,104 @@ function Overview() {
       i === index? {...row, systemfield: val.value}:row
     ));
   }
-  // Handle change 
-  // useEffect(()=>{
-  //   console.log(rows);
-  // },[rows])
-  // Sample data
-  // const rows = [
-  //   createData("id", "Transaction ID"),
-  //   createData("date", "Date"),
-  // ];
-  const columns = [keysColumn["Transaction ID"], keysColumn["Customer ID"], keysColumn["Product ID"], keysColumn["Payment Method"], keysColumn["Store Location"], keysColumn["Salesperson ID"]];
-  const rows1 =[
-    {"Transaction ID": 1, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 2, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 3, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 4, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 5, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 6, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 7, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 8, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 9, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-    {"Transaction ID": 10, "Customer ID":2 , "Product ID": 3, "Payment Method": 4, "Store Location": 5, "Salesperson ID": 6,},
-  ];
+  function handleFileChange(e){
+    setError("");
+    // Check if user has entered the file
+    if (e.target.files.length) {
+        const inputFile = e.target.files[0];
 
+        // Check the file extensions, if it not
+        // included in the allowed extensions
+        // we show the error
+        const fileExtension =
+            inputFile?.type.split("/")[1];
+        if (
+            !allowedExtensions.includes(fileExtension)
+        ) {
+            setError("Please input a csv file");
+            return;
+        }
+
+        // If input type is correct set the state
+        setFile(inputFile);
+    }
+  }
+  const handleParse = () => {
+     
+    // If user clicks the parse button without
+    // a file we show a error
+    if (!file) return ;
+
+    // Initialize a reader which allows user
+    // to read any file or blob.
+    const reader = new FileReader();
+
+    // Event listener on reader when the file
+    // loads, we parse it and set the data.
+    reader.onload = async ({ target }) => {
+        const csv = Papa.parse(target.result, {
+            header: true,
+        });
+        const parsedData = csv?.data;
+
+        setColumnTest(Object.keys(parsedData[0]));
+        setData(parsedData);
+        // setLoading(true);
+        // setTimeout(()=>{
+        //   setIsUpload(true);
+        //   setLoading(false);
+        // },1000);
+        
+    };
+    reader.readAsText(file);
+  };
+  function handleCSVFileChange(e){
+    if (e.target.files.length) {
+      setFile(e.target.files[0]);
+    }
+  }
+  function createTestField(){
+    if (columnTest) 
+      return columnTest.map((item)=> ({field: item, headerName:item, width: 130}));
+    return [];
+  }
+  async function submitFile(){
+    setLoading(true);
+    console.log(file);
+    var resData = await loadData(file);
+    setOpen(false);
+    var mappingData = resData.mapping;
+    // var cols = Object.keys[mappingData];
+    setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+  }
+  // let mappingData = useRef([]);
+  async function getDataFromFile(){
+        try{
+        var resData = await getData();
+        setLoading(false)
+        console.log(resData);
+        setData(resData.data);
+        setColumnTest(Object.keys(resData.data[0]))
+        setIsUpload(true);
+        }
+        catch(error){
+          console.log(error);
+        }
+      }
+  useEffect(() => {
+    if (file){
+      getDataFromFile()
+    }
+    // handleParse();
+    // var resData = loadData(file);
+    // mappingData = resData.mapping;
+    // // var cols = Object.keys[mappingData];
+    // setRows(Object.keys[mappingData].map((item) => (createData(item, mappingData[item]))));
+  },[file]);
+  useEffect(()=>{
+    console.log(data)
+    console.log(columnTest)
+  },[]);
   return (
     <div className='mx-32 mt-8 min-h-1000'>
       <div className='flex items-center text-deep-blue'>
@@ -135,7 +239,7 @@ function Overview() {
           <h1 className=" font-sans text-xl font-bold ">Overview</h1>
         </Link>
         <span className='font-bold px-1 font-mono'> &gt; </span>
-      </div>
+      </div>  
       <div className='flex text-vivid-blue'>
         <PreviewIcon sx={{height:"auto", width:"36px"}} />
         <h2 className=" font-sans text-3xl font-bold"> Data Review</h2>
@@ -145,37 +249,82 @@ function Overview() {
       <Box sx={{display: "flex", flexDirection: "column", border:"1px solid", borderStyle:"dotted", margin: "16px 0px", width:"80vw", height:"500px", alignItems:"center", justifyContent:"center", background:"white"}}>
         <div className="text-xl">Add your data in here</div>
         <div className="text-xl">Once loaded, your data will appear in this section.</div>
-        <div className='flex flex-row space-x-4 mt-4'>
+        {/* <div className='flex flex-row space-x-4 mt-4'>
         <button className='flex flex-col border rounded w-36 p-1 items-center justify-center bg-light-blue'
         onClick={() => excelFileInputRef.current.click()}
         >
           <img src={ExcelLogo}></img>
           <span >Import from Excel</span>
-          <input type='file' ref={excelFileInputRef} accept='application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' hidden/>
+          <input type='file' ref={excelFileInputRef} onChange={handleFileChange} accept='application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' hidden/>
         </button>
         <button className='flex flex-col border rounded w-36 p-1 items-center justify-center bg-light-blue'
         onClick={() => textFileInputRef.current.click()}
         >
           <img src={TxtLogo}></img>
-          <span>Import from Text/csv</span> 
-          <input type='file' ref={textFileInputRef} accept='text/csv' hidden/>
+          <span>Import from Text/csv</span>
+          <input type='file' ref={textFileInputRef} onChange={handleCSVFileChange} accept='text/csv' hidden/>
         </button>
+        </div> */}
+        <div className='w-80 p-8 flex flex-col items-center border-2 border-dashed border-logo-color rounded-sm mt-2'>
+          <FileUploadOutlinedIcon fontSize="large" sx={{color:"#38bdf8", fontSize: 80}}/>
+          <button className='text-white bg-logo-color rounded-2xl py-1 px-4' onClick={()=>{setOpen(true)}} >Browser</button>
+          <span>File supported .xlsx, .xls, .csv</span>
         </div>
+        <Dialog
+        onClose={handleClose}
+        open={open}
+        fullWidth
+        maxWidth="xs"
+        >
+          <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          Upload
+          </DialogTitle>
+          <DialogContent>
+            <FormControl fullWidth sx={{marginTop:1}} >
+              <InputLabel id='type-select-label'>Input File Type</InputLabel>
+              <Select
+              value={type}
+              labelId="type-select-label"
+              id="type-select"
+              label="Type"
+              onChange={(e)=>{setType(e.target.value)}}
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="csv">Csv</MenuItem>
+                <MenuItem value="excel">Excel</MenuItem>
+              </Select>
+            </FormControl>
+            
+          </DialogContent>
+          <DialogContent>
+          {type==='excel' && <input type='file' ref={excelFileInputRef} onChange={handleFileChange} accept='application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'/>}
+          {type==='csv' && <input type='file' ref={textFileInputRef} onChange={handleCSVFileChange} accept='text/csv'/>}
+          </DialogContent>
+          <DialogActions>
+          <Button autoFocus onClick={submitFile}>
+            Upload
+          </Button>
+        </DialogActions>
+        </Dialog>
       </Box>:
-        loading? <CircularProgress/>
+        loading? 
+        <div className='text-center flex flex-col items-center h-400 w-80vw'>
+          <LoadingDot/>
+          <h3 className='text-3xl font-bold text-vivid-pink'>Loading</h3>
+        </div> 
           // Sample table
           :<div style={{ height: 400, width: '100%', margin: "16px 0px"}}>
             <DataGrid
-              rows={rows1}
-              columns={columns}
+              rows={data}
+              columns={createTestField()}
               initialState={{
                 pagination: {
-                  paginationModel: { page: 0, pageSize: 5 },
+                  paginationModel: { page: 0, pageSize: 10 },
                 },
               }}
-              pageSizeOptions={[5, 10]}
+              pageSizeOptions={[10, 50, 100]}
               checkboxSelection
-              getRowId={(row)=>row["Transaction ID"]} /// Fix when add api
+              getRowId={(row)=>row[columnTest[0]]} /// Fix when add api
             />
           </div>
       }
@@ -203,7 +352,7 @@ function Overview() {
               >
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{getDescription(row.systemfield)}</TableCell>
-                <TableCell><Select 
+                <TableCell><SelectReact 
                 // value={row.systemfield}
                 defaultValue={{value: row.systemfield, label: row.systemfield}}
                 onChange={(value) => getSelect(value, index)}
@@ -217,10 +366,14 @@ function Overview() {
       </TableContainer>
       <Button variant='contained'>Apply</Button>
       </>
-      :loading? <CircularProgress/>
+      :loading?
+      <div className='text-center flex flex-col items-center bg-white my-4 mx-0 w-80vw'>
+        <LoadingDot/>
+        <h3 className='text-3xl font-bold text-vivid-pink'>Loading</h3>
+      </div>
       :<div className='text-center flex flex-col items-center bg-white my-4 mx-0 w-80vw'>
-      <LoadingDot/>
-      <h3 className='text-2xl font-bold text-vivid-pink'>I'm waiting for your data</h3>
+        <LoadingDot/>
+        <h3 className='text-3xl font-bold text-vivid-pink'>I'm waiting for your data</h3>
       </div>
       }
       <GetBackToTopButton/>

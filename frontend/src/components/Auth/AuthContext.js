@@ -1,22 +1,25 @@
 // AuthContext.js
 import React from 'react';
 import { ACCESS_TOKEN } from './constants';
-const AuthContext = React.createContext();
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import api from '../Service/apiService';
+
+const AuthContext = createContext();
 
 export function useAuth() {
-    return React.useContext(AuthContext);
+    return useContext(AuthContext);
 }
 
 export function AuthProvider({ children }) {
     const [isAuthorized, setIsAuthorized] = React.useState(null);
 
-    React.useEffect(() => {
+    useMemo(() => {
         // Kiểm tra token từ localStorage
         const token = localStorage.getItem(ACCESS_TOKEN);
+        
         if (token === null) {
-
             setIsAuthorized(false);
-
+            
         } else {
             setIsAuthorized(true);
         }

@@ -10,7 +10,7 @@ import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import GetBackToTopButton from './GetBackToTopButton';
 import Img1 from './Img/homepage1.png';
 import TextField from '@mui/material/TextField';
-function MyComponent() {
+function HomePage() {
     return (
         <div className="bg-slate-200 flex flex-col mx-auto p-0 lg:max-w-1024">
             <div className="flex mt-28 gap-5">
@@ -200,6 +200,6 @@ function MyComponent() {
         </div>
     );
 }
-export default MyComponent;
+export default HomePage;
 
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import api from "./api";
+import { useEffect, useState } from "react";
+import api from "../Service/apiService";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 // import LoadingIndicator from "./LoadingIndicator";
@@ -25,6 +25,7 @@ function evaluatePasswordStrength(password) {
 }
 
 function Form({ route, method }) {
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState('');
@@ -32,7 +33,7 @@ function Form({ route, method }) {
     const navigate = useNavigate();
     const [passwordStrength, setPasswordStrength] = useState('');
     const { setIsAuthorized } = useAuth();
-    const name = method === "login" ? "Login" : "Register";
+    const page = method === "login" ? "Login" : "Register";
     const handlePasswordChange = (e) => {
         const password = e.target.value;
         setPasswordStrength(evaluatePasswordStrength(password));
@@ -40,7 +41,7 @@ function Form({ route, method }) {
     };
     function getColor(str){
         if (str === 'Strong') return 'text-green';
-        else if (str == 'Medium') return 'text-orange';
+        else if (str === 'Medium') return 'text-orange';
         else return 'text-red';
     }
     const handleSubmit = async (e) => {
@@ -58,25 +59,40 @@ function Form({ route, method }) {
             return;
         }
         setLoading(true);
-
-        try {
-            const res = await api.post(route, { email, password })
-            if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access);
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        if (method === "login") {
+            try {
+                const res = await api.post(route, { email, password });
+                localStorage.setItem(ACCESS_TOKEN, res.data["token"]);
                 setIsAuthorized(true);
-                navigate("/overview")
-            } else {
-                navigate("/login")
+                navigate("/overview");
+            } catch (error) {
+                console.log(error);
+                if (error.code === "ERR_NETWORK"){
+                    setErrorMessage('Can\'t connect to server.');
+                }
+                else setErrorMessage('Username or pass word incorrect.');
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.log(error);
-            setErrorMessage('Username or password incorrect.');
-        } finally {
-            setLoading(false)
         }
+        else {
+            try {
+                api.post(route, {name, email, password },
+                    {headers: {
+                      'Content-Type': 'application/json',
+                    }
+                });
+                navigate("/login");
+            } catch (error) {
+                console.log(error);
+                setErrorMessage('Error');
+            } finally {
+                setLoading(false)   
+            }
+        }
+
     };
-    if (name === "Login") {
+    if (page === "Login") {
         return (
             <div className="block items-center text-center bg-slate-200 pt-28 h-100vh">
                 <header className="text-vivid-blue text-6xl font-sans">Sign in</header>
@@ -129,6 +145,17 @@ function Form({ route, method }) {
             <header className="text-vivid-blue text-6xl font-sans">Sign up</header>
             <div className="text-vivid-blue mt-4 font-sans">Create your account!</div>
             <form onSubmit={handleSubmit} >
+                <div>
+                    <label htmlFor="name" className="absolute w-px h-px p-0 truncate">Enter Your Name</label>
+                    <input
+                        id="name"
+                        type="text"
+                        placeholder="Enter Name"
+                        className="w-72 p-3 mt-5 max-w-full border border-vivid-blue rounded-lg"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                    />
+                </div>
                 <div>
                     <label htmlFor="email" className="absolute w-px h-px p-0 truncate">Enter Email</label>
                     <input

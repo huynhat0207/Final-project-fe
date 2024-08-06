@@ -47,3 +47,7 @@ span.input-group-addon {
 .linkStyled { 
   text-decoration: "none";
    color: 'brown' }
+
+.js-plotly-plot .plotly .modebar svg {
+  display: inline;
+}

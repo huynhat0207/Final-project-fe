@@ -22,6 +22,10 @@ const Header = () => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const rfmHandle = () => {
+        setAnchorEl(null);
+        window.location.href='./rfm';
+    };
 
     if (!isAuthorized) {
     return (
@@ -88,7 +92,6 @@ const Header = () => {
                         Data&Retailers
                     </span>
                     </Link>
-                
                 </div>
                 <div className='hidden lg:flex self-stretch justify-between'>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={() => {
@@ -164,7 +167,8 @@ const Header = () => {
                         'aria-labelledby': 'basic-button',
                     }}
                     >
-                    <MenuItem onClick={handleClose}>RFM Analysis</MenuItem>
+                    <MenuItem onClick={rfmHandle}>RFM Analysis</MenuItem>
+                    <MenuItem >Forecasting</MenuItem>
                     </Menu>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./dashboard'}}>Dashboard</Button>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>Support</Button>

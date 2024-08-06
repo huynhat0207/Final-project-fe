@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header/Header";
 
-function Layout(currentPage) {
+function Layout() {
   return (
     <>
-    <Header currentPage={currentPage}/>
-    <Outlet/>
+    <Header />
+    <Outlet />
     </>
   )
 }
