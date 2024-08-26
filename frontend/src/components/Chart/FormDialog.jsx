@@ -10,17 +10,17 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import SingleValue from '../Content/SingleValue';
+import SingleValue from './Content/SingleValue';
 import Slider from '@mui/material/Slider';
 import { FormLabel } from '@mui/material';
 import {Typography} from '@mui/material';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-
+import { BarChartApi, BoxPlotApi, HistogramApi, LineChartApi, PieChartApi, getData } from '../Service/chartService';
 function FormDialog(props) {
     // Props
-    const {title, method, open, setOpen, listOfCharts, setListOfCharts, listCols} = props;
+    const {title, open, setOpen, listOfCharts, setListOfCharts, listCols} = props;
     // States
     const [type, setType] = useState(null);
     const [size, setSize] = useState(2);
@@ -31,12 +31,7 @@ function FormDialog(props) {
     const [labelCol, setLabelCol] = useState(null);
     const [xAxis, setXAxis] =useState(null);
     const [yAxis, setYAxis] =useState(null);
-    const [col0, setCol0] = useState(null);
-    const [col1, setCol1] = useState(null);
-    const [col2, setCol2] = useState(null);
-    const [col3, setCol3] = useState(null);
-    const [col4, setCol4] = useState(null);
-    const [cal, setCal]   = useState(null);
+    const [func, setFunc] = useState(null);
 
     // Function
     const handleClose = () => {
@@ -47,27 +42,8 @@ function FormDialog(props) {
         setType(e.target.value);
     };
     const handleMultipleLines = (e) =>{
-        console.log(e.target.value);
+        // console.log(e.target.value);
         setIsMul(e.target.value);
-    }
-    const setColumnByIndex = (e, index) =>{
-        switch(index){
-            case 0: 
-            setCol0(e.target.value);
-            break;
-            case 1: 
-            setCol1(e.target.value);
-            break;
-            case 2: 
-            setCol2(e.target.value);
-            break;
-            case 3: 
-            setCol3(e.target.value);
-            break;
-            case 4: 
-            setCol4(e.target.value);
-            break;
-        }
     }
     function valuetext(value) {
         return `${value}`;
@@ -79,22 +55,24 @@ function FormDialog(props) {
         {value: '2', name: "2"},
     ]);
 
-    const calOptions = [
-        {name: 'Count', value:'count'}, 
-        {name: 'Mean', value:'mean'},
+    const funcOptions = [
         {name: 'Sum', value:'sum'},
-        {name: 'Minimum', value:'min'},
+        {name: 'Mean', value:'mean'},
         {name: 'Maximum', value:'max'},
+        {name: 'Minimum', value:'min'},
+        {name: 'Count', value:'count'}, 
+        {name: 'Median', value:'median'},
+        {name: 'Standard Deviation', value:'std'},
     ];
     useEffect(() =>{
         if (listCols){
             setFields(listCols.map((item)=> ({value: item, name: item})));
         }
     },[listCols]);
-    useEffect(() =>{
-        console.log(col0,col1,col2,col3,col4);
-    },[col0,col1,col2,col3,col4]);
-    
+    const setData = async() => {
+        const data = await getData(type,isMul, func, xAxis, yAxis, labelCol);
+        setListOfCharts([...listOfCharts, {data:data, width: size, title: name, type: type, option:{ type: type, isMul: isMul, func:func, xAxis: xAxis, yAxis: yAxis, labelCol: labelCol}}]);
+    }
     return (
         <Dialog
         open={open}
@@ -104,12 +82,13 @@ function FormDialog(props) {
         PaperProps={{
             component:"form",
             onSubmit: (event) => {
-                if (method === 'add') {
-                setListOfCharts([...listOfCharts, {width: size, title: name, type: type, option:{label: labelCol, xCol: xAxis, yCol: yAxis}}]);
+                // const data = getData(type);
+                // console.log(data); 
+                // if (method === 'add') {
+                // setListOfCharts([...listOfCharts, {data:data, width: size, title: name, type: type, option:{label: labelCol, xCol: xAxis, yCol: yAxis}}]);
+                setData();
                 event.preventDefault();
                 handleClose();
-                }
-                // ADD Edit submit
             }
         }}
         >
@@ -154,27 +133,27 @@ function FormDialog(props) {
                         onChange={(e) => setSize(e.target.value)}
                     />
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="field">Field</InputLabel>
+                        <InputLabel id="func">Function</InputLabel>
+                        <Select
+                        labelId="func"
+                        id="func-select"
+                        label="func"
+                        required
+                        onChange={(e) => setFunc(e.target.value)}
+                        >
+                            {funcOptions.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="field">Value Field</InputLabel>
                         <Select
                         labelId="field"
                         id="field-select"
                         label="Field"
                         required
-                        onChange={(e) => {setLabelCol(e.target.value);}}
+                        onChange={(e) => {setXAxis(e.target.value);}}
                         >
                             {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="cal">Calculate</InputLabel>
-                        <Select
-                        labelId="cal"
-                        id="cal-select"
-                        label="Calculate"
-                        required
-                        onChange={(e) => setCal(e.target.value)}
-                        >
-                            {calOptions.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
                     <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
@@ -211,7 +190,7 @@ function FormDialog(props) {
                         <FormControlLabel value={'false'} control={<Radio />} label="Single lines" />
                     </RadioGroup>
                     </FormControl>
-                    {isMul === 'true'? 
+                    {isMul === 'true'? <>
                         <FormControl fullWidth sx={{marginTop:"10px"}}>
                             <InputLabel id="label-field">Label Field</InputLabel>
                             <Select
@@ -223,8 +202,22 @@ function FormDialog(props) {
                             >
                                 {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                             </Select>
-                        </FormControl>: null
+                        </FormControl>
+                        </>
+                        : null
                     }
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="label-type">Function</InputLabel>
+                        <Select
+                        labelId="label-type"
+                        id="label-type-select"
+                        label="Type Value"
+                        required
+                        onChange={(e) => setFunc(e.target.value)}
+                        >
+                            {funcOptions.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="x-axis-field">X-axis Field</InputLabel>
                         <Select
@@ -237,19 +230,6 @@ function FormDialog(props) {
                             {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
-                    {/* <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="label-type">Type Value</InputLabel>
-                        <Select
-                        labelId="label-type"
-                        id="label-type-select"
-                        label="Type Value"
-                        required
-                        onChange={(e) => setCal(e.target.value)}
-                        >
-                            <MenuItem value="Value Count"> Value Count </MenuItem>
-                            <MenuItem value="Sum of Value Column"> Sum of Value Column </MenuItem>
-                        </Select>
-                    </FormControl> */}
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="y-axis-field">Y-axis Field</InputLabel>
                         <Select
@@ -262,48 +242,6 @@ function FormDialog(props) {
                             {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
-                    {/* <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="label-type">Type Value</InputLabel>
-                        <Select
-                        labelId="label-type"
-                        id="label-type-select"
-                        label="Type Value"
-                        required
-                        onChange={(e) => setCal(e.target.value)}
-                        >
-                            <MenuItem value="Value Count"> Value Count </MenuItem>
-                            <MenuItem value="Sum of Value Column"> Sum of Value Column </MenuItem>
-                        </Select>
-                    </FormControl> */}
-                    {/* {cal === "Sum of Value Column" &&
-                        <>
-                        <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Number of value fields">Number of value fields</InputLabel>
-                            <Select
-                            labelId="num-field"
-                            id="num-field-select"
-                            label="Number of value fields"
-                            defaultValue={1}
-                            required
-                            onChange={(e) => {setNum(e.target.value);}}
-                            >
-                                {[1,2,3,4,5].map((item)=><MenuItem value={item}>{item}</MenuItem>)}
-                        </Select>
-                        </FormControl>
-                        {[...Array(num)].map((item, index) => <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Value field">Value Field {index}</InputLabel>
-                            <Select
-                            labelId="value-field"
-                            id="value-field-select"
-                            label="Value field"
-                            required
-                            onChange={(e) => setColumnByIndex(e,index)}
-                            >
-                                {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
-                            </Select>
-                        </FormControl>)}
-                        </>
-                    } */}
                     <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
                 </>}
                 {type === 'bar' &&
@@ -325,60 +263,67 @@ function FormDialog(props) {
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
                     />
+                    <FormLabel id="demo-row-radio-buttons-group-label">Number of lines</FormLabel>
+                    <RadioGroup
+                        row
+                        aria-labelledby="demo-row-radio-buttons-group-label"
+                        name="row-radio-buttons-group"
+                        value={isMul}
+                        onChange={handleMultipleLines}
+                    >
+                        <FormControlLabel value={'true'} control={<Radio />} label="Multiple lines" />
+                        <FormControlLabel value={'false'} control={<Radio />} label="Single lines" />
+                    </RadioGroup>
+                    {isMul === 'true'?
+                        <FormControl fullWidth sx={{marginTop:"10px"}}>
+                            <InputLabel id="label-field">Label Field</InputLabel>
+                            <Select
+                            labelId="label-field"
+                            id="label-field-select"
+                            label="Label field"
+                            required
+                            onChange={(e) => {setLabelCol(e.target.value);}}
+                            >
+                                {fields.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    :null}
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="Label field">Label Field</InputLabel>
+                        <InputLabel id="label-type">Function</InputLabel>
                         <Select
-                        labelId="label-field"
-                        id="label-field-select"
-                        label="Label field"
+                        labelId="label-type"
+                        id="label-type-select"
+                        label="Type Value"
                         required
-                        onChange={(e) => {setLabelCol(e.target.value);}}
+                        onChange={(e) => setFunc(e.target.value)}
+                        >
+                            {funcOptions.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="x-axis-field">X-axis Field</InputLabel>
+                        <Select
+                        labelId="x-axis-field"
+                        id="x-axis-field-select"
+                        label="X-axis field"
+                        required
+                        onChange={(e) => {setXAxis(e.target.value);}}
+                        >
+                            {fields.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="y-axis-field">Y-axis Field</InputLabel>
+                        <Select
+                        labelId="y-axis-field"
+                        id="y-axis-field-select"
+                        label="Y-axis field"
+                        required
+                        onChange={(e) => {setYAxis(e.target.value);}}
                         >
                             {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
-                    <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="cal">Calculate</InputLabel>
-                        <Select
-                        labelId="cal"
-                        id="cal-select"
-                        label="Calculate"
-                        required
-                        onChange={(e) => setCal(e.target.value)}
-                        >
-                            <MenuItem value="Value Count"> Value Count </MenuItem>
-                            <MenuItem value="Sum of Value Column"> Sum of Value Column </MenuItem>
-                        </Select>
-                    </FormControl>
-                    {cal === "Sum of Value Column" &&
-                        <>
-                        <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Number of value fields">Number of value fields</InputLabel>
-                            <Select
-                            labelId="num-field"
-                            id="num-field-select"
-                            label="Number of value fields"
-                            defaultValue={1}
-                            required
-                            onChange={(e) => {setNum(e.target.value);}}
-                            >
-                                {[1,2,3,4,5].map((item)=><MenuItem value={item}>{item}</MenuItem>)}
-                        </Select>
-                        </FormControl>
-                        {[...Array(num)].map((item, index) => <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Value field">Value Field {index}</InputLabel>
-                            <Select
-                            labelId="value-field"
-                            id="value-field-select"
-                            label="Value field"
-                            required
-                            onChange={(e) => setColumnByIndex(e,index)}
-                            >
-                                {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
-                            </Select>
-                        </FormControl>)}
-                        </>
-                    }
                     <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
                 </>}
                 {type === 'pie' &&
@@ -401,66 +346,129 @@ function FormDialog(props) {
                         onChange={(e) => setSize(e.target.value)}
                     />
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="label-type">Function</InputLabel>
+                        <Select
+                        labelId="label-type"
+                        id="label-type-select"
+                        label="Type Value"
+                        required
+                        onChange={(e) => setFunc(e.target.value)}
+                        >
+                            {funcOptions.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="Label field">Label Field</InputLabel>
                         <Select
                         labelId="label-field"
                         id="label-field-select"
                         label="Label field"
                         required
-                        onChange={(e) => {setLabelCol(e.target.value);}}
+                        onChange={(e) => {setXAxis(e.target.value);}}
+                        >
+                            {fields.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="y-axis-field">Values Field</InputLabel>
+                        <Select
+                        labelId="y-axis-field"
+                        id="y-axis-field-select"
+                        label="Y-axis field"
+                        required
+                        onChange={(e) => {setYAxis(e.target.value);}}
                         >
                             {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
+                    <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
+                </>}
+                {type === 'box' &&
+                <>
+                    <Typography>
+                        Size
+                    </Typography>
+                    <Slider
+                        aria-label="Size"
+                        aria-labelledby="size-slider"
+                        // defaultValue={2}
+                        getAriaValueText={valuetext}
+                        valueLabelDisplay="auto"
+                        shiftStep={3}
+                        step={1}
+                        marks
+                        min={1}
+                        max={4}
+                        value={size}
+                        onChange={(e) => setSize(e.target.value)}
+                    />
+
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
-                        <InputLabel id="cal">Calculate</InputLabel>
+                        <InputLabel id="Label field">Label Field</InputLabel>
                         <Select
-                        labelId="cal"
-                        id="cal-select"
-                        label="Calculate"
+                        labelId="label-field"
+                        id="label-field-select"
+                        label="Label field"
                         required
-                        onChange={(e) => setCal(e.target.value)}
+                        onChange={(e) => {setXAxis(e.target.value);}}
                         >
-                            <MenuItem value="Value Count"> Value Count </MenuItem>
-                            <MenuItem value="Sum of Value Column"> Sum of Value Column </MenuItem>
+                            {fields.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
+                        </Select>
+                    </FormControl> 
+   
+                    
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="y-axis-field">Values Field</InputLabel>
+                        <Select
+                        labelId="y-axis-field"
+                        id="y-axis-field-select"
+                        label="Y-axis field"
+                        required
+                        onChange={(e) => {setYAxis(e.target.value);}}
+                        >
+                            {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
                         </Select>
                     </FormControl>
-                    {cal === "Sum of Value Column" &&
-                        <>
-                        <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Number of value fields">Number of value fields</InputLabel>
-                            <Select
-                            labelId="num-field"
-                            id="num-field-select"
-                            label="Number of value fields"
-                            defaultValue={1}
-                            required
-                            onChange={(e) => {setNum(e.target.value);}}
-                            >
-                                {[1,2,3,4,5].map((item)=><MenuItem value={item}>{item}</MenuItem>)}
+                    <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
+                </>}
+                {type === 'histogram' &&
+                <>
+                    <Typography>
+                    Size
+                    </Typography>
+                    <Slider
+                        aria-label="Size"
+                        aria-labelledby="size-slider"
+                        // defaultValue={2}
+                        getAriaValueText={valuetext}
+                        valueLabelDisplay="auto"
+                        shiftStep={3}
+                        step={1}
+                        marks
+                        min={1}
+                        max={5}
+                        value={size}
+                        onChange={(e) => setSize(e.target.value)}
+                    />
+                    <FormControl fullWidth sx={{marginTop:"10px"}}>
+                        <InputLabel id="field">Values Field</InputLabel>
+                        <Select
+                        labelId="field"
+                        id="field-select"
+                        label="Field"
+                        required
+                        onChange={(e) => {setXAxis(e.target.value);}}
+                        >
+                            {fields.map((item)=> <MenuItem key={item.value} value={item.value}> {item.name} </MenuItem>)}
                         </Select>
-                        </FormControl>
-                        {[...Array(num)].map((item, index) => <FormControl fullWidth sx={{marginTop:"10px"}}>
-                            <InputLabel id="Value field">Value Field {index}</InputLabel>
-                            <Select
-                            labelId="value-field"
-                            id="value-field-select"
-                            label="Value field"
-                            required
-                            onChange={(e) => setColumnByIndex(e,index)}
-                            >
-                                {fields.map((item)=> <MenuItem value={item.value}> {item.name} </MenuItem>)}
-                            </Select>
-                        </FormControl>)}
-                        </>
-                    }
+                    </FormControl>
                     <TextField label="Name of the chart" fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>setName(e.target.value)}/>
                 </>}
 
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>
-                {method === 'add'? <Button type="submit">Add</Button>: <Button type="submit">Edit</Button>}
+                <Button type="submit">Add</Button>
             </DialogActions>
         </Dialog>
     )

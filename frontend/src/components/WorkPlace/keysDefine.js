@@ -1,0 +1,21 @@
+export const keysDescription = {
+    "Transaction ID": "A unique identifier for each transaction or sale.",
+    "Date": "The date on which the transaction occurred.",
+    "Time": "The time at which the transaction occurred.",
+    "Customer ID": "A unique identifier for each customer.",
+    "Customer Age": "The age of the customer.",
+    "Customer Gender": "The gender of the customer.",
+    "Product ID": "A unique identifier for each product.",
+    "Product Name":"The name or description of the product.",
+    "Category": "The category to which the product belongs (e.g., electronics, clothing, groceries).",
+    "Quantity": "The number of units of the product sold in the transaction.",
+    "Unit Price": "The price per unit of the product.",
+    "Total Price": "The total price for the quantity of products sold in the transaction (Quantity * Unit Price).",
+    "Payment Method": "The method of payment used (e.g., cash, credit card, debit card).",
+    "Store Location": "The location of the store where the transaction took place.",
+    "Discount": "Any discount applied to the transaction.",
+    "Salesperson ID": "A unique identifier for the salesperson handling the transaction.",
+    "Profit Margin": "The profit margin on the product sold.",
+    "Other": "Other",
+};
+export const sampleFields = ['Quantity', 'Total Price', 'Unit Price']

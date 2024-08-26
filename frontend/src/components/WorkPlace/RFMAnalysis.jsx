@@ -20,12 +20,20 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
-import LoadingDot from '../Animation/LoadingDot';
 import { rfmAnalysis, getColumns } from '../Service/dataService';
 import MenuItem from '@mui/material/MenuItem';
 import { visuallyHidden } from "@mui/utils";
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { Box } from '@mui/material';
+import ClearAllOutlinedIcon from '@mui/icons-material/ClearAllOutlined';
+import Plot from 'react-plotly.js';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import Loading from '../Loading';
 
 const dataColumns = [
   { dataKey: 'Customer_id', label: 'ID', width: 70 },
@@ -82,7 +90,7 @@ function RFMAnalysis() {
   const [monetary, setMonetary] = useState(null);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
-
+  const [open, setOpen] = useState(false);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -154,21 +162,37 @@ function RFMAnalysis() {
   async function handleApply(){
     console.log('click');
     setLoading(true);
-    var rfmData = await rfmAnalysis(recency, monetary, id);
-    // console.log(rfmData);
-    setData(rfmData);
-    setLoading(false);
-    setIsApply(true);
+    try {
+      var rfmData = await rfmAnalysis(recency, monetary, id);
+      if (rfmData){
+        setData(rfmData);
+        setLoading(false);
+        setIsApply(true);
+      }
+    }catch(error){
+      console.log(error);
+    }
+    
+  }
+  function handleClose(){
+    setOpen(false);
   }
   useEffect(()=>{
     async function getCols() {
-      var cols = await getColumns();
-      setMetric(cols.metric);
-      setNominal(cols.nominal)
+      try{
+        var cols = await getColumns();
+        if(cols){
+          setMetric(cols.metric);
+          setNominal(cols.nominal);
+        }
+      }catch(error){
+        setOpen(true);
+      }
     }
     getCols();
   },[]);
   return (
+    <>
     <div className='mx-32 mt-8 min-h-1000'>
     <div className='flex items-center text-deep-blue'>
       <Link to='../home' ><HomeIcon/></Link>
@@ -245,9 +269,17 @@ function RFMAnalysis() {
     </div>
     
     {isApply?
+    <>
+    {/* <div className='flex flex-row my-2 border-b-2 border-deep-blue'>
+    <h2 className=' text-xl font-bold text-deep-blue'> <ClearAllOutlinedIcon/> Top RFM Score</h2>
+    </div> */}
+    <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
+      <ClearAllOutlinedIcon/> Top RFM Score
+    </h2>
+
     <Paper style={{ height: 400, width: '100%' }}>
       <TableVirtuoso
-          data={data}
+          data={data.data}
           components={VirtuosoTableComponents}
           // fixedHeaderContent={fixedHeaderContent}
           fixedHeaderContent={() => (
@@ -260,14 +292,57 @@ function RFMAnalysis() {
           itemContent={rowContent}
       />
     </Paper>
-    :loading? <CircularProgress/>
-    :
-    <div className='text-center flex flex-col items-center bg-white my-4 mx-0 w-80vw'>
-    <LoadingDot/>
-    <h3 className='text-3xl font-bold text-vivid-pink'>I'm waiting for you to apply</h3>
-    </div>
+    <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
+      <ClearAllOutlinedIcon/>RFM Histogram
+    </h2>
+    <Plot
+      data={[
+        {
+          x: data.m_data,
+          type: 'histogram',
+          name: 'Monetary',
+        },
+        {
+          x: data.r_data,
+          type: 'histogram',
+          name: 'Recency',
+          xaxis: 'x2',
+          yaxis: 'y2',
+        },
+        {
+          x: data.f_data,
+          type: 'histogram',
+          name: 'Frequency',
+          xaxis: 'x3',
+          yaxis: 'y3',
+        },
+      ]}
+      layout={ {width: 960, height: 720, title: 'Histogram', paddingLeft:'10px' , grid: {rows: 1, columns: 3, pattern: 'independent'},} }
+      style={{flex: '1 1 0%'}}
+    />
+    </>
+    :loading? <Loading title="Analysing"/>
+    :<Loading title="I'm waiting for you to apply"/>
     }
   </div>
+  <Dialog
+    open={open}
+    onClose={handleClose}
+  >
+    <DialogTitle>
+      File not found!
+    </DialogTitle>
+    <DialogContent>
+     You need to upload file before going to this!  
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleClose}>Cancel</Button>
+      <Button onClick={() => {window.location.href="./overview"}} autoFocus>
+          Back to Overview
+          </Button>
+    </DialogActions>
+  </Dialog>
+  </>
   )
 }
 

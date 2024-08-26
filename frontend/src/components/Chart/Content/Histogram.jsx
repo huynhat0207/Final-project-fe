@@ -1,21 +1,31 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Plot from 'react-plotly.js'
+import { getData } from "../../Service/chartService";
 
-function Histogram() {
-    var x = [];
-    for (var i = 0; i < 500; i ++) {
-        x[i] = Math.random();
-    }
-
-    var trace = {
-        x: x,
-        type: 'histogram',
-    };
-    const data = [trace]
+function Histogram(props) {
+    const {data, width, height, option} = props;
+    const [dataChart, setDataChart] = useState(data);
+    useEffect(()=>{
+        async function fetchDate(){
+        try{
+            const resData = await getData(option.type, option.isMul, option.func, option.xAxis, option.yAxis, option.labelCol);
+            setDataChart(resData);
+        }catch(error){
+            console.log(error);
+        }
+        }
+        fetchDate();
+    },[]);
     return (
-        <Plot
-            data={data}
-        />
+        <div onMouseDown={(e) => e.stopPropagation()}>
+            <Plot
+                data={dataChart}
+                layout = {{
+                    width: width - 20,
+                    height: height - 65,
+                }}
+            />
+        </div>
     )
 }
 

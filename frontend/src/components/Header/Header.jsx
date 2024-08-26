@@ -10,11 +10,22 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { styled, alpha } from '@mui/material/styles';
+
+const StyledMenu = styled((props) => (
+    <Menu
+      {...props}
+    />
+  ))(({ theme }) => ({
+    "& .MuiPaper-root": {
+      backgroundColor: "white"
+    }
+  }));
+
 const Header = () => {
     const location = useLocation();
     const { isAuthorized } = useAuth();
     const [anchorEl, setAnchorEl] = React.useState(null);
-
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -25,6 +36,10 @@ const Header = () => {
     const rfmHandle = () => {
         setAnchorEl(null);
         window.location.href='./rfm';
+    };
+    const forecastHandle = () => {
+        setAnchorEl(null);
+        window.location.href='./forecast';
     };
 
     if (!isAuthorized) {
@@ -65,7 +80,7 @@ const Header = () => {
                                 behavior: 'smooth'
                             });
                         }}>Contact Us</Button>
-                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>SURVEY</Button>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.open('https://forms.gle/v17FnfRE6m9faSDn7')}}>SURVEY</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
                 
@@ -112,7 +127,7 @@ const Header = () => {
                                 behavior: 'smooth'
                             });
                         }}>Contact Us</Button>
-                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>SURVEY</Button>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.open('https://forms.gle/v17FnfRE6m9faSDn7')}}>SURVEY</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
                     <Button 
@@ -159,19 +174,20 @@ const Header = () => {
                     >
                         Analysis
                     </Button>
-                    <Menu
+                    <StyledMenu
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
                     MenuListProps={{
                         'aria-labelledby': 'basic-button',
                     }}
+                    sx={{color:'rgb(56 189 248)'}}
                     >
-                    <MenuItem onClick={rfmHandle}>RFM Analysis</MenuItem>
-                    <MenuItem >Forecasting</MenuItem>
-                    </Menu>
+                    <MenuItem onClick={rfmHandle} sx={{color:'rgb(23 37 84)'}}>RFM Analysis</MenuItem>
+                    <MenuItem onClick={forecastHandle} sx={{color:'rgb(23 37 84)'}}>Forecasting</MenuItem>
+                    </StyledMenu>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./dashboard'}}>Dashboard</Button>
-                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}}>Support</Button>
+                    <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./support'}}>Support</Button>
                 </div>
                 <div className="flex flex-1 justify-end">
                     <Button>

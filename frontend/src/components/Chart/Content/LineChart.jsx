@@ -1,34 +1,32 @@
 import React, {useEffect, useState} from "react";
 import Plot from 'react-plotly.js'
+import { getData } from "../../Service/chartService";
 
 function LineChart(props) {
   const {data, width, height, option} = props;
-  
+  const [dataChart, setDataChart] = useState(data);
+  useEffect(()=>{
+    async function fetchDate(){
+      try{
+        const resData = await getData(option.type, option.isMul, option.func, option.xAxis, option.yAxis, option.labelCol);
+        setDataChart(resData);
+      }catch(error){
+        console.log(error);
+      }
+    }
+    fetchDate();
+  },[]);
   return (
+    <div onMouseDown={(e) => e.stopPropagation()}>
     <Plot
-      data={[
-        {
-          x: ['da', 'asd', 'das', 'ads'],
-          y: [10, 15, 13, 17],
-          mode:'lines',
-        },
-        {
-          x: ['da', 'asd', 'das', 'ads'],
-          y: [16, 5, 11, 9],
-          mode:'lines',
-        },
-      ]}
+      data={dataChart}
 
       layout = {{
-        title: 'sdad',
         width: width - 20,
         height: height - 65,
       }}
-      // layout={{
-      //   width:380, 
-      //   height: 330,
-      // }}
     />
+    </div>
   );
 }
 export default LineChart;

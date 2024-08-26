@@ -1,36 +1,31 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Plot from 'react-plotly.js'
-
-function PieChart() {
-  const [data, setData] = useState([]);
+import { getData } from "../../Service/chartService";
+function PieChart(props) {
+  const {data, width, height, option} = props;
+  const [dataChart, setDataChart] = useState(data);
+  useEffect(()=>{
+    async function fetchDate(){
+      try{
+        const resData = await getData(option.type, option.isMul, option.func, option.xAxis, option.yAxis, option.labelCol);
+        setDataChart(resData);
+      }catch(error){
+        console.log(error);
+      }
+    }
+    fetchDate();
+  },[]);
   return (
+    <div onMouseDown={(e) => e.stopPropagation()}>
     <Plot 
-      data={[
-        {
-          values: [19, 26, 55],
-          labels: ['Residential', 'Non-Residential', 'Utility'],
-          type: 'pie',
-          domain:{
-            row:0,
-            column:0,
-          }
-        },
-        {
-          values: [43, 23, 31],
-          labels: ['Test1', 'Test2', 'Test3'],
-          type: 'pie',
-          domain:{
-            row:0,
-            column:1,
-          }
-        }
-      ]}
+      data={dataChart}
       layout ={{
-        height: 400,
-        width: 380,
+        height: height - 65,
+        width: width - 20,
         grid:{rows: 1, columns: 2}
       }}
     />
+    </div>
   )
 }
 

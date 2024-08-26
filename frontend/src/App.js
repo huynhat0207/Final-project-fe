@@ -5,7 +5,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 import { Box } from "@mui/material";
 import Home from './components/HomePage.jsx'
 import SignIn from "./components/Auth/SignIn.jsx"
-import SignupForm from "./components/Auth/SignUp.jsx"
+import Signup from "./components/Auth/SignUp.jsx"
 import ProtectedRoute from "./components/Auth/ProtectedRoute.jsx"
 import NotFound from "./components/NotFound.jsx"
 import { AuthProvider } from "./components/Auth/AuthContext.js";
@@ -13,36 +13,45 @@ import Layout from "./components/Layout.jsx";
 import Overview from "./components/WorkPlace/Overview.jsx"
 import Dashboard from "./components/WorkPlace/Dashboard.jsx"
 import RFMAnalysis from "./components/WorkPlace/RFMAnalysis.jsx"
+import Support from "./components/WorkPlace/Support.jsx";
+import Forecasting from "./components/WorkPlace/Forecasting.jsx";
+import { deleteData } from "./components/Service/dataService.js";
 // import TestPage from "./components/TestPage.jsx"
 
-function Logout() {
+async function Logout() {
   localStorage.clear()
+  // const res = await deleteData();
   return <Navigate to="/login" />
 }
 
 function RegisterAndLogout() {
   localStorage.clear()
-  return <SignupForm />
+  return <Signup />
 }
-
+// function ReturnHomePage(){
+//   return <N
+// }
 function App() {
   const mainList = [
-    { path: '/overview', element: <Overview/> },
-    { path: '/dashboard', element: <Dashboard/> },
-    { path: '/rfm', element: <RFMAnalysis/> },
+    {id:0, path: '/overview', element: <Overview/> },
+    {id:1, path: '/dashboard', element: <Dashboard/> },
+    {id:2, path: '/rfm', element: <RFMAnalysis/> },
+    {id:3, path: '/support', element: <Support/> },
+    {id:4, path: '/forecast', element: <Forecasting/> },
   ];
   return (
     <AuthProvider>
       <Box className="w-screen bg-slate-200">
       {/* <Header currentPage={pageLocation} />  */}
       <Routes>
+        <Route path='/' element={<Navigate to="/home"/>}/>
         <Route path="/login" element={<SignIn />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />
           <Route element={<Layout/>}>
             <Route path="/home" element={<Home />} />
             {/* Protected routes */}
-            {mainList.map((item) => <Route path={item.path} element={<ProtectedRoute>{item.element}</ProtectedRoute>} />)}
+            {mainList.map((item) => <Route key={item.id} path={item.path} element={<ProtectedRoute>{item.element}</ProtectedRoute>} />)}
             {/* <Route path="/test" element={<TestPage />} /> */}
             {/* Not found route */}
             <Route path="*" element={<NotFound />} />

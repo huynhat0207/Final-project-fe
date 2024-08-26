@@ -40,9 +40,11 @@ module.exports = {
         400: '400px',
         420: '420px',
         510: '510px',
+        500: '500px',
         600: '600px',
         650: '650px',
         685: '685px',
+        700: '700px',
         800: '800px',
         '20vh': '20vh',
         '40vh': '40vh',
@@ -111,6 +113,11 @@ module.exports = {
       aspectRatio:{
         '6/5': '6 / 5',
       },
+      gradientColorStopPositions: {
+        0: '0%',
+        50: '50%',
+        100: '100%',
+      }
     },
   },
   plugins: [],
