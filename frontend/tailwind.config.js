@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 // './src/**/*.{js,jsx,ts,tsx}'
+const plugin = require('tailwindcss/plugin')
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}',
     './src/components/**/*.{js,jsx,ts,tsx}',
@@ -19,7 +20,12 @@ module.exports = {
         340: '340px',
         350: '350px',
         375: '375px',
+        400: '400px',
+        420: '420px',
         460: '460px',
+        500: '500px',
+        560: '560px',
+        600: '600px',
         656: '656px',
         880: '880px',
         508: '508px',
@@ -117,8 +123,26 @@ module.exports = {
         0: '0%',
         50: '50%',
         100: '100%',
-      }
+      },
+      gridTemplateColumns:{
+        'custom': '72px 400px',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function({ addUtilities, addComponents, e, prefix, config }) {
+      const newUtilities = {
+        '.horizontal-tb': {
+          writingMode: 'horizontal-tb',
+        },
+        '.vertical-rl': {
+          writingMode: 'vertical-rl'
+        },
+        '.vertical-lr': {
+          writingMode: 'vertical-lr'
+        }
+      }
+      addUtilities(newUtilities)
+    }),
+  ],
 };

@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from "react"
+import React from "react"
 import './App.css'
-import { Routes, Route, Navigate, useLocation } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { Box } from "@mui/material";
 import Home from './components/HomePage.jsx'
 import SignIn from "./components/Auth/SignIn.jsx"
@@ -15,12 +15,13 @@ import Dashboard from "./components/WorkPlace/Dashboard.jsx"
 import RFMAnalysis from "./components/WorkPlace/RFMAnalysis.jsx"
 import Support from "./components/WorkPlace/Support.jsx";
 import Forecasting from "./components/WorkPlace/Forecasting.jsx";
-import { deleteData } from "./components/Service/dataService.js";
+import Chatbot from "./components/WorkPlace/Chatbot.jsx";
+// import { deleteData } from "./components/Service/dataService.js";
 // import TestPage from "./components/TestPage.jsx"
 
-async function Logout() {
-  localStorage.clear()
-  // const res = await deleteData();
+
+function Logout() {
+  localStorage.clear();
   return <Navigate to="/login" />
 }
 
@@ -28,9 +29,6 @@ function RegisterAndLogout() {
   localStorage.clear()
   return <Signup />
 }
-// function ReturnHomePage(){
-//   return <N
-// }
 function App() {
   const mainList = [
     {id:0, path: '/overview', element: <Overview/> },
@@ -38,10 +36,11 @@ function App() {
     {id:2, path: '/rfm', element: <RFMAnalysis/> },
     {id:3, path: '/support', element: <Support/> },
     {id:4, path: '/forecast', element: <Forecasting/> },
+    {id:4, path: '/chatbot', element: <Chatbot/> },
   ];
   return (
     <AuthProvider>
-      <Box className="w-screen bg-slate-200">
+      <Box className="w-screen bg-slate-200 overflow-y-auto">
       {/* <Header currentPage={pageLocation} />  */}
       <Routes>
         <Route path='/' element={<Navigate to="/home"/>}/>

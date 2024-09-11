@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
 import { loginAuth } from "../Service/authService";
+import logo from '../Img/Logo.png'
 
 function evaluatePasswordStrength(password) {
     const lengthCriteria = password.length >= 12;
@@ -75,6 +76,19 @@ function Signup() {
     };
     return (
         <div className="block items-center text-center bg-slate-200 pt-28 h-100vh">
+            <div className=' absolute left-10 top-8'>
+                    <Link to="/home" className="-m-1.5 p-1.5 flex flex-row">
+                    <img
+                        loading="lazy"
+                        src={logo}
+                        alt="Company Logo"
+                        className="h-8 w-auto"
+                    />
+                    <span className='text-xl p-0.5 font-bold text-deep-blue'>
+                        Data&Retailers
+                    </span>
+                    </Link>
+            </div>
             <header className="text-vivid-blue text-6xl font-sans">Sign up</header>
             <div className="text-vivid-blue mt-4 font-sans">Create your account!</div>
             <form onSubmit={handleSubmit} >

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import HomeIcon from '@mui/icons-material/Home'
 import Select from '@mui/material/Select';
@@ -14,42 +14,184 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import CancelIcon from '@mui/icons-material/Cancel'
-import { Button, Divider, List } from '@mui/material';
+import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider } from '@mui/material';
 import { sampleFields } from './keysDefine';
 import InsightsIcon from '@mui/icons-material/Insights';
 import Plot from 'react-plotly.js';
 import {Card, CardContent, Typography} from '@mui/material';
 import { forecastData } from '../Service/analysisService';
 import Loading from '../Loading';
+import LoadingDialog from '../LoadingDialog';
+import { getColumns } from '../Service/dataService';
+import { SingleValueApi } from '../Service/chartService';
+import CircularProgress from '@mui/material/CircularProgress';
+const FilterDialog = (props) =>{
+    const {open, setOpen, filter, setFilter} = props;
+    const [cols, setCols] = React.useState([]);
+    const [cur, setCur] = React.useState('');
+    const [values, setValues] = React.useState('');
+    const [val, setVal] = React.useState('');
+    const [loading, setLoading] = React.useState(true);
+    const handleClose = () =>{
+        setOpen(false);
+    }
+    function addFilter(){
+        if (cur in filter === false){
+            const newFilter = {...filter, [cur] :val}
+            setFilter(newFilter);
+        }else{
+            console.log('Key is exist');
+        }
+        setOpen(false);
+    }
+    useEffect(()=>{
+        var cols;
+        async function getCols() {
+          try{
+            cols = await getColumns();
+            if(cols.columns){
+                setCols(cols.columns);
+            }
+          }catch(error){
+            console.log(error)
+          }
+        }
+        getCols();
+        console.log(val)
+      },[]);
+    useEffect(()=>{
+        async function getValues() {
+            var res;
+            setLoading(true);
+            try{
+                if (cur !== ""){
+                    res = await SingleValueApi('unique', cur);
+                    if(res.value){
+                        setValues(res.value);
+                    }
+                }
+            }catch(error){
+              console.log(error)
+            }finally{
+                setLoading(false);
+            }
+          }
+          getValues();
+    },[cur]);
+
+    return(
+        <Dialog
+        open={open}
+        onClose={handleClose}
+        // sx={{ width: 320 }}
+        sx={{
+            "& .MuiDialog-container": {
+              "& .MuiPaper-root": {
+                width: "380px",
+                height:"320px" ,
+                // maxWidth: "500px",  // Set your width here
+              },
+            },
+          }}
+        >
+            <DialogTitle>Add Filter</DialogTitle>
+            {!loading?
+            <>
+            <DialogContent>
+                <InputLabel id="cols">Select Column</InputLabel>
+                <Select
+                labelId='cols'
+                label='Select Column'
+                value={cur}
+                sx={{ width: 300 }}
+                onChange={(e) => setCur(e.target.value)}
+                >
+                    {cols.map((item)=><MenuItem key={item} value={item} >{item}</MenuItem>)}
+                </Select>
+                {values &&
+                <Autocomplete
+                disablePortal
+                options={values}
+                sx={{ width: 300, paddingTop:2 }}
+                onChange={(e, newVal) => setVal(newVal)}
+                renderInput={(params) => <TextField {...params} label="Select Value" />}
+                />}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button onClick={addFilter}> Add</Button>
+            </DialogActions>
+            </>
+            :
+            <div className='flex h-full justify-center items-center justify-items-center'>
+            <CircularProgress size={80}/>
+            </div>}
+        </Dialog>
+    )
+}
 
 function Forecasting() {
     const [time, setTime] = React.useState(1);
     const [metric, setMetric] = React.useState(null);
-    const listSample = ['case1', 'case2', 'case3', 'case4', 'case5'];
+    const [filter, setFilter] = React.useState({});
     const [date, setDate] = React.useState([]);
     const [predict, setPredict] = React.useState([]);
     const [truth, setTruth] = React.useState([]);
     const [mse, setMse] = React.useState(null);
     const [mae, setMae] = React.useState(null);
     const [value, setValue] = React.useState(null);
-    const [selectedNames, setSelectedNames] = React.useState([]);
+    // const [selectedNames, setSelectedNames] = React.useState([]);
     const [isApply, setIsApply] = React.useState(false);
-
+    const [loading, setLoading] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
+    function changeForm(){
+        var keys = Object.keys(filter);
+        return keys.map((item) => item + ":" + filter[item])
+        // return keys.map((item) => ({item:filter[item]}))
+    }
     async function submitForecast(){
-        const res = await forecastData(time, metric);
-        console.log(res);
-        if (res){
-            setDate(res.eval.ds);
-            setTruth(res.eval.y_truth);
-            setPredict(res.eval.y_hat);
-            console.log(res.eval.mse, res.eval.mae, res.eval.value)
-            setMse(res.mse);
-            setMae(res.mae);
-            setValue(res.value);
-            setIsApply(true);
+        setLoading(true);
+        try{
+            if (Object.keys(filter).length === 0){
+                const res = await forecastData(time, metric);
+                if (res){
+                    setDate(res.eval.ds);
+                    setTruth(res.eval.y_truth);
+                    setPredict(res.eval.y_hat);
+                    // console.log(res.eval.mse, res.eval.mae, res.eval.value)
+                    setMse(res.mse);
+                    setMae(res.mae);
+                    setValue(res.value);
+                    setIsApply(true);
+                }
+            }
+            else {
+                const res = await forecastData(time, metric, filter);
+                if (res){
+                    setDate(res.eval.ds);
+                    setTruth(res.eval.y_truth);
+                    setPredict(res.eval.y_hat);
+                    // console.log(res.eval.mse, res.eval.mae, res.eval.value)
+                    setMse(res.mse);
+                    setMae(res.mae);
+                    setValue(res.value);
+                    setIsApply(true);
+                }
+            }
+        }catch(e){
+            console.log(e);
+        }finally{
+            setLoading(false);
         }
     }
+    useEffect(()=>{
+        console.log(filter);
+    },[filter])
+    // useEffect(()=>{
+    //     console.log(changeForm());
+    // },[])
     return (
+        <>
         <div className='mx-32 mt-8 min-h-1000'>
             <div className='flex items-center text-deep-blue'>
                 <Link to='../home' ><HomeIcon/></Link>
@@ -87,8 +229,7 @@ function Forecasting() {
                         </FormControl>
                     </div>
                 </Grid>
-
-                <Grid item xs={2} sm={4} md={4} key="recency">
+                <Grid item xs={2} sm={4} md={4} key="data">
             <div className='bg-white rounded-lg p-1 h-full'>
             <div className="font-bold pl-1">Data: </div>
             <FormControl sx={{ m: 1, minWidth: 120, width:'100%', paddingRight:2}} size="small">
@@ -97,31 +238,30 @@ function Forecasting() {
                     labelId="demo-select-small-label"
                     sx={{width:"auto"}}
                     // id=""
-                    value={metric}
-                    label="DataRecency"
+                    value={metric ?? ''}
+                    label="Data"
                     onChange={(e) => setMetric(e.target.value)}
                     >
-                    {sampleFields.map((item) => <MenuItem value={item}>{item}</MenuItem>)}
+                    {sampleFields.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                     </Select>
                     <FormHelperText>Select the name of the column you want to forecast.</FormHelperText>
                     </FormControl>
                     </div>
                 </Grid>
-                <Grid item xs={2} sm={4} md={4} key="recency">
+                <Grid item xs={2} sm={4} md={4} key="filterData">
                     <div className='bg-white rounded-lg p-1 h-auto'>
                     <div className="font-bold pl-1">Filter by: </div>
                     <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                        <InputLabel id="demo-select-small-label">Data</InputLabel>
-                        <Select
+                        {/* <InputLabel id="demo-select-small-label">Data</InputLabel> */}
+                        {/* <Select
                         labelId="demo-select-small-label"
-                        value={selectedNames}
+                        value={selectedNames ?? ''}
+                        // defaultValue={}
                         onChange={(e) => setSelectedNames(e.target.value)}
                         multiple
-                        // sx={{overflow:'scroll'}}
-                        label="Fields"
+                        label="Data"
                         // onChange={(e) => setId(e.target.value)}
-                        input={<OutlinedInput label="Multiple Select" maxRows={1} />}
-                        // input={<List style={{overflow: 'auto'}} />}
+                        input={<OutlinedInput label="Data" maxRows={1} />}
                         renderValue={(selected) => (
                             <Stack gap={1} direction="row" flexWrap="wrap">
                                 {selected.map((value) => (
@@ -144,21 +284,68 @@ function Forecasting() {
                         )}
                         >
                         {listSample.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                        </Select>
+                        </Select> */}
+                        <Autocomplete
+                            clearIcon={false}
+                            options={[]}
+                            freeSolo
+                            multiple
+                            size='small'
+                            renderTags={(value, props) =>
+                                value.map((option, index) => (
+                                  <Chip label={option} {...props({ index })} 
+                                  onDelete={()=>{
+                                    const copyVals= {...filter}
+                                    delete copyVals[option.substring(0, option.indexOf(":"))];
+                                    setFilter(copyVals);
+                                }}
+                                  deleteIcon={
+                                    <CancelIcon
+                                        onMouseDown={(event) => event.stopPropagation()}
+                                    />
+                                    }
+                                  />
+                                ))
+                            }
+                            // readOnly
+                            value={changeForm()}
+                            // onChange={(e)=>setFilter([...filter, e.target.value])}
+                            renderInput={(params) => <TextField label="Filter Tags" inputProps={{ readOnly: true }} {...params} />}
+                        />
                         <FormHelperText>Select the name of the column containing data about customer identity.</FormHelperText>
                     </FormControl>
+                    <Stack>
+                        <Button variant='contained' onClick={()=>setOpen(true)} >Create New</Button>
+                    </Stack>
                     </div>
                 </Grid>
             </Grid>
             <Button variant='contained' sx={{marginTop: 1}} onClick={submitForecast}>
                 Apply
             </Button>
-
             <div className='flex text-vivid-blue mt-2'>
                 <AssessmentIcon sx={{height:"auto", width:"36px"}} />
                 <h2 className=" font-sans text-3xl font-bold"> Forecasting Result</h2>
             </div>
             {isApply?<>
+            <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
+                <InsightsIcon/> Predict by {metric} (Next 30 days)
+            </h2>
+            <div className='mt-4'>
+                <Plot
+                    data={[
+                        {
+                            x: value.ds,
+                            y: value.yhat,
+                            mode: 'lines+markers',
+                            name: 'real',
+                            line: {shape: 'linear'},
+                            type: 'scatter'
+                        },
+                    ]}
+                    layout={{width: 1200, height:600, title: metric+" in 30 days next" }}
+                />
+            </div>
             <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
                 <InsightsIcon/> Training Result Chart
             </h2>
@@ -201,7 +388,7 @@ function Forecasting() {
                                     Sum of Predict Values
                                 </Typography>
                                 <Typography variant="h3" sx={{width:'100%', color: '#077907', overflow: 'hidden', textOverflow:'ellipsis'}} >
-                                    {value}
+                                    {/* {value} */}
                                 </Typography>
                             </CardContent>
                         </Card>
@@ -238,7 +425,9 @@ function Forecasting() {
             <Loading title="I'm waiting for you to apply" />
         }
         </div>
-        
+        <LoadingDialog open={loading} message='Please wait as this may take a few minutes...'/>
+        <FilterDialog open={open} setOpen={setOpen} filter={filter} setFilter={setFilter} />
+        </>
     )
 }
 

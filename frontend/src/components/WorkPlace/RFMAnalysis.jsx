@@ -1,9 +1,10 @@
-import {React, useState, forwardRef, Fragment, useEffect} from 'react'
+import {React, useState, forwardRef, Fragment, useEffect, useRef} from 'react'
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import SummarizeIcon from '@mui/icons-material/Summarize';
+// import SummarizeIcon from '@mui/icons-material/Summarize';
 import { Grid } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar} from '@mui/x-data-grid';
+// import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -11,156 +12,162 @@ import FormControl from '@mui/material/FormControl';
 import Button from '@mui/material/Button';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import { TableVirtuoso } from 'react-virtuoso';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import CircularProgress from '@mui/material/CircularProgress';
-import { rfmAnalysis, getColumns } from '../Service/dataService';
+// import CircularProgress from '@mui/material/CircularProgress';
+import { getColumns } from '../Service/dataService';
+import { rfmAnalysis } from '../Service/analysisService';
 import MenuItem from '@mui/material/MenuItem';
-import { visuallyHidden } from "@mui/utils";
-import TableSortLabel from '@mui/material/TableSortLabel';
-import { Box } from '@mui/material';
 import ClearAllOutlinedIcon from '@mui/icons-material/ClearAllOutlined';
-import Plot from 'react-plotly.js';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import DownloadIcon from '@mui/icons-material/Download';
 import Loading from '../Loading';
+import FileNotFound from './FileNotFound';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import SquareIcon from '@mui/icons-material/Square';
+import { rfmClassification } from './keysDefine';
+import ListSubheader from '@mui/material/ListSubheader';
+import { exportComponentAsJPEG, exportComponentAsPDF, exportComponentAsPNG } from 'react-component-export-image';
 
 const dataColumns = [
-  { dataKey: 'Customer_id', label: 'ID', width: 70 },
+  { dataKey: 'Customer ID', label: 'ID', width: 70 },
   { dataKey: 'Recency', label: 'Recency', width: 130, numeric: true, },
   { dataKey: 'Frequency', label: 'Frequency', width: 130, numeric: true, },
   { dataKey: 'Monetary', label: 'Monetary', width: 130, numeric: true, },
-  { dataKey: 'R_rank_norm', label: 'R Rank Norm', width: 130, numeric: true, },
-  { dataKey: 'F_rank_norm', label: 'F Rank Norm', width: 130, numeric: true, },
-  { dataKey: 'M_rank_norm', label: 'M Rank Norm', width: 130, numeric: true, },
+  { dataKey: 'R_Score', label: 'R Score', width: 130, numeric: true, },
+  { dataKey: 'F_Score', label: 'F Score', width: 130, numeric: true, },
+  { dataKey: 'M_Score', label: 'M Score', width: 130, numeric: true, },
   { dataKey: 'RFM_Score', label: 'RFM Score', width: 130, numeric: true, },
   { dataKey: 'Customer_segment', label: 'Customer Segment', width: 130 },
 ];
 
-function EnhancedTableHead(props) {
-  const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
+const RFMChart = (props) => {
+  const {exportPNG, total, counts} = props;
+  function getValue(val){
+    if (counts[val] !== undefined){
+      // console.log(counts[val]);
+      return counts[val];
+    }
+    // console.log('False');
+    return 0;
+  }
+  function getPercentage(val){
+    if (counts[val] !== undefined){
+      return Math.round(counts[val]/total*100);
+    }
+    return 0;
+  }
+  function getColor(index){
+    return rfmClassification[index].color;
+  }
+  return(<>
+  <div className='flex flex-row pt-4 pl-20' ref={exportPNG}>
+    <div className='grid grid-cols-custom w-560'>
+      <div className='flex flex-row max-w-20'>
+        <div className='flex flex-col h-auto w-5 justify-center items-center' style={{ transform:' rotate(-90deg)'}}>
+          <div className='text-xl font-bold text-nowrap' > {"(Frequency + Monetary) / 2"}</div>
+        </div>
+        
+        <div className='flex flex-col pl-2'>
+          {[1,2,3,4,5].map((val) => <div className='text-3xl font-bold w-8 h-12 flex-1'>{val}</div>)}
+        </div>
+      </div>
 
-  return (
-    <TableRow>
-      {dataColumns.map((headCell) => (
-        <TableCell
-          key={headCell.dataKey}
-          align={headCell.numeric ? "right" : "left"}
-          sortDirection={orderBy === headCell.dataKey ? order : false}
-        >
-          <TableSortLabel
-            active={orderBy === headCell.dataKey}
-            direction={orderBy === headCell.dataKey ? order : "asc"}
-            onClick={createSortHandler(headCell.dataKey)}
-          >
-            {headCell.label}
-            {orderBy === headCell.dataKey ? (
-              <Box component="span" sx={visuallyHidden}>
-                {order === "desc" ? "sorted descending" : "sorted ascending"}
-              </Box>
-            ) : null}
-          </TableSortLabel>
-        </TableCell>
-      ))}
-    </TableRow>
-  );
+      <div className='grid grid-rows-5 grid-cols-5 gap-1 w-400 h-400 float-right'>
+        <div className='col-span-2 bg-red pl-2' style={{backgroundColor: getColor(8)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Can't Lose Them")}%</span><br/>
+          <span className='font-bold'>{getValue("Can't Lose Them")}</span>
+        </div>
+        <div className='col-span-2 row-span-2 bg-red pl-2' style={{backgroundColor: getColor(1)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Loyal Customers")}%</span><br/>
+          <span className='font-bold'>{getValue("Loyal Customers")}</span>
+        </div>
+        <div className='row-span-2 bg-red pl-2' style={{backgroundColor: getColor(0)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Champions")}%</span><br/>
+          <span className='font-bold'>{getValue("Champions")}</span>
+        </div>
+        <div className='col-span-2 row-span-2 bg-red pl-2' style={{backgroundColor: getColor(7)}}>
+          <span className='text-3xl font-bold'>{getPercentage("At Risk")}%</span><br/>
+          <span className='font-bold'>{getValue("At Risk")}</span>
+        </div>
+        <div className='bg-red pl-2' style={{backgroundColor: getColor(6)}}>
+          <span className='text-3xl font-bold'>{getPercentage("About To Sleep")}%</span><br/>
+          <span className='font-bold'>{getValue("About To Sleep")}</span>
+        </div>
+        <div className='col-span-2 row-span-2 bg-red pl-2' style={{backgroundColor: getColor(2)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Potential Loyalist")}%</span><br/>
+          <span className='font-bold'>{getValue("Potential Loyalist")}</span>
+        </div>
+        <div className='col-span-2 row-span-2 bg-red pl-2' style={{backgroundColor: getColor(9)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Hibernating")}%</span><br/>
+          <span className='font-bold'>{getValue("Hibernating")}</span>
+        </div>
+        <div className='row-span-2 bg-red pl-2' style={{backgroundColor: getColor(5)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Need Attention")}%</span><br/>
+          <span className='font-bold'>{getValue("Need Attention")}</span>
+        </div>
+          <div className='bg-red pl-2' style={{backgroundColor: getColor(4)}}>
+          <span className='text-3xl font-bold'>{getPercentage("Promising")}%</span><br/>
+          <span className='font-bold'>{getValue("Promising")}</span>
+        </div>
+        <div className='bg-red pl-2' style={{backgroundColor: getColor(3)}}>
+          <span className='text-3xl font-bold'>{getPercentage("New Customers")}%</span><br/>
+          <span className='font-bold'>{getValue("New Customers")}</span>
+        </div>
+      </div>
+        <div/> {/* NULL */}
+      <div>
+      <div className='flex flex-row'>
+          {[1,2,3,4,5].map((val) => <div key={val} className='text-3xl font-bold w-8 h-8 flex-1 text-center'>{val}</div>)}
+        </div>
+      </div>
+        <div/>{/* NULL */}
+      <div className='text-xl font-bold text-center'> Recency</div>
+    </div>
+    <div className='flex flex-col w-auto'>
+      <div className='text-6xl font-bold font-sans'> {total} <span className='text-xl font-normal'>Total Customers</span></div>
+      <List
+      sx={{width: '100%'}}
+      component="nav"
+      subheader={
+        <ListSubheader component="div" id="nested-list-subheader" sx={{backgroundColor:'inherit', textAlign:'end'}} >
+          Number of customers
+        </ListSubheader>
+      }
+      >
+        {rfmClassification.map((val) => 
+          <ListItemButton sx={{ height: 30 }} key={val.name}>
+            <ListItem>
+              <ListItemIcon>
+                {/* <div className='' style={{background}}></div> */}
+                <SquareIcon sx={{color: val.color, backgroundColor: val.color , width:'18px', height:'18px'}}/>
+                </ListItemIcon>
+              <ListItemText primary={val.name} />
+              <ListItemText secondary={getValue(val.name)} sx={{paddingLeft:10, textAlign:'end'}}/>
+            </ListItem>
+          </ListItemButton>
+        )}
+      </List>
+    </div>
+  </div>
+
+  </>
+)
 }
 
 function RFMAnalysis() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isApply, setIsApply] = useState(false);
-  const [metric, setMetric] = useState([]);
-  const [nominal, setNominal] = useState([]);
+  const [columns, setColumns] = useState([]); 
   const [recency, setRecency] = useState(null);
   const [id, setId] = useState(null);
   const [monetary, setMonetary] = useState(null);
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("");
   const [open, setOpen] = useState(false);
+  const exportPNG = useRef();
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-
-    if (isAsc) {
-      data.sort((a, b) => -compare(a, b, property)); // A-Z
-    } else {
-      data.sort((a, b) => compare(a, b, property)); // Z-A
-    }
-
-    setData(data);
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-  function compare(a, b, property) {
-    if (a[property] < b[property]) {
-      return -1;
-    }
-    if (a[property] > b[property]) {
-      return 1;
-    }
-    return 0;
-  }
-
-  const VirtuosoTableComponents = {
-    Scroller: forwardRef((props, ref) => (
-      <TableContainer component={Paper} {...props} ref={ref} />
-    )),
-    Table: (props) => (
-      <Table stickyHeader {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
-    ),
-    TableHead,
-    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
-    TableBody: forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
-  };
-  function fixedHeaderContent() {
-      return (
-        <TableRow>
-          {dataColumns.map((column) => (
-            <TableCell
-              key={column.dataKey}
-              variant="head"
-              align={column.numeric || false ? 'right' : 'left'}
-              style={{ width: column.width }}
-              sx={{
-                backgroundColor: 'background.paper',
-              }}
-            >
-              {column.label}
-            </TableCell>
-          ))}
-        </TableRow>
-      );
-  }
-  function rowContent(_index, row) {
-      return (
-        <Fragment>
-          {dataColumns.map((column) => (
-            <TableCell
-              key={column.dataKey}
-              align={column.numeric || false ? 'right' : 'left'}
-            >
-              {row[column.dataKey]}
-            </TableCell>
-          ))}
-        </Fragment>
-      );
-  }
   async function handleApply(){
-    console.log('click');
     setLoading(true);
     try {
       var rfmData = await rfmAnalysis(recency, monetary, id);
@@ -174,16 +181,40 @@ function RFMAnalysis() {
     }
     
   }
-  function handleClose(){
-    setOpen(false);
+  function exportToPNG(){
+    exportComponentAsPNG(exportPNG);
+  }
+  function createTestField(){
+    if (data)
+      return Object.keys(data.data[0]).map((item)=> (
+    {
+      field: item, 
+      headerName:item, 
+      width: 130,
+      renderHeader: (item) => (
+        <strong className='text-dark-blue'>
+          {item.field}
+        </strong>
+      ),
+    }
+  ));
+    return [];
+  }
+  function generateRandom() {
+    var length = 8,
+        charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        retVal = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
   }
   useEffect(()=>{
     async function getCols() {
       try{
         var cols = await getColumns();
-        if(cols){
-          setMetric(cols.metric);
-          setNominal(cols.nominal);
+        if(cols.columns){
+          setColumns(cols.columns);
         }
       }catch(error){
         setOpen(true);
@@ -191,6 +222,12 @@ function RFMAnalysis() {
     }
     getCols();
   },[]);
+  // useEffect(()=>{
+  //   console.log(data);
+  //   if (data.length!=0){
+  //     console.log(Object.keys(data.data));
+  //   }
+  // },[data])
   return (
     <>
     <div className='mx-32 mt-8 min-h-1000'>
@@ -215,17 +252,17 @@ function RFMAnalysis() {
                   <Select
                   labelId="demo-select-small-label"
                   // id=""
-                  value={recency}
+                  value={recency ?? ""}
                   label="DataRecency"
                   onChange={(e) => setRecency(e.target.value)}
                   >
-                  {nominal.map((item) => <MenuItem value={item}>{item}</MenuItem>)}
+                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                   </Select>
                   <FormHelperText>Select the name of the column containing data about recency.</FormHelperText>
           </FormControl>
           </div>
       </Grid>
-      <Grid item xs={2} sm={4} md={4} key="recency">
+      <Grid item xs={2} sm={4} md={4} key="monetary">
           <div className='bg-white rounded-lg p-1 h-36'>
           <div className="font-bold pl-1">Monetary Data: </div>
           <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
@@ -233,17 +270,17 @@ function RFMAnalysis() {
                   <Select
                   labelId="demo-select-small-label"
                   // id=""
-                  value={monetary}
+                  value={monetary ?? ""}
                   label="DataRecency"
                   onChange={(e) => setMonetary(e.target.value)}
                   >
-                  {metric.map((item) => <MenuItem value={item}>{item}</MenuItem>)}
+                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                   </Select>
                   <FormHelperText>Select the name of the column containing data about monetary.</FormHelperText>
           </FormControl>
           </div>
       </Grid>
-      <Grid item xs={2} sm={4} md={4} key="recency">
+      <Grid item xs={2} sm={4} md={4} key="customer">
           <div className='bg-white rounded-lg p-1 h-36'>
           <div className="font-bold pl-1">Customer Index: </div>
           <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
@@ -251,11 +288,11 @@ function RFMAnalysis() {
                   <Select
                   labelId="demo-select-small-label"
                   // id=""
-                  value={id}
+                  value={id ?? ""}
                   label="DataRecency"
                   onChange={(e) => setId(e.target.value)}
                   >
-                  {nominal.map((item) => <MenuItem value={item}>{item}</MenuItem>)}
+                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                   </Select>
                   <FormHelperText>Select the name of the column containing data about customer identity.</FormHelperText>
           </FormControl>
@@ -267,81 +304,47 @@ function RFMAnalysis() {
       <AssessmentIcon sx={{height:"auto", width:"36px"}} />
       <h2 className=" font-sans text-3xl font-bold"> Analysis Result</h2>
     </div>
-    
+
     {isApply?
     <>
-    {/* <div className='flex flex-row my-2 border-b-2 border-deep-blue'>
-    <h2 className=' text-xl font-bold text-deep-blue'> <ClearAllOutlinedIcon/> Top RFM Score</h2>
-    </div> */}
     <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
       <ClearAllOutlinedIcon/> Top RFM Score
     </h2>
-
-    <Paper style={{ height: 400, width: '100%' }}>
-      <TableVirtuoso
-          data={data.data}
-          components={VirtuosoTableComponents}
-          // fixedHeaderContent={fixedHeaderContent}
-          fixedHeaderContent={() => (
-            <EnhancedTableHead
-              onRequestSort={handleRequestSort}
-              order={order}
-              orderBy={orderBy}
-            />
-          )}
-          itemContent={rowContent}
+    <div className='h-500 w-full my-2 mx-0 flex flex-col'>
+      <DataGrid
+        rows={data.data}
+        columns={createTestField()}
+        initialState={{
+          pagination: {
+            paginationModel: { page: 0, pageSize: 10 },
+          },
+        }}
+        pageSizeOptions={[10, 50, 100]}
+        checkboxSelection
+        getRowId={(row)=> generateRandom()} /// Fix when add api
+        slots={{ toolbar: GridToolbar }}
+        sx={{
+          marginTop: 1, 
+          border:1, 
+          // borderColor:'#38bdf8', 
+          color:'#0D2A41',
+          '& .MuiDataGrid-cell:hover': {color: 'rgb(13 42 65)',}
+        }}
       />
-    </Paper>
+    </div>
     <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
-      <ClearAllOutlinedIcon/>RFM Histogram
+      <ClearAllOutlinedIcon/>RFM Segments
     </h2>
-    <Plot
-      data={[
-        {
-          x: data.m_data,
-          type: 'histogram',
-          name: 'Monetary',
-        },
-        {
-          x: data.r_data,
-          type: 'histogram',
-          name: 'Recency',
-          xaxis: 'x2',
-          yaxis: 'y2',
-        },
-        {
-          x: data.f_data,
-          type: 'histogram',
-          name: 'Frequency',
-          xaxis: 'x3',
-          yaxis: 'y3',
-        },
-      ]}
-      layout={ {width: 960, height: 720, title: 'Histogram', paddingLeft:'10px' , grid: {rows: 1, columns: 3, pattern: 'independent'},} }
-      style={{flex: '1 1 0%'}}
-    />
+    <Button onClick={exportToPNG} variant='contained' sx={{marginBottom: '4px'}}> 
+      <DownloadIcon /> Export As PNG
+    </Button>
+    <RFMChart exportPNG={exportPNG} total={data.total} counts={data.value_counts}/>
     </>
     :loading? <Loading title="Analysing"/>
     :<Loading title="I'm waiting for you to apply"/>
     }
   </div>
-  <Dialog
-    open={open}
-    onClose={handleClose}
-  >
-    <DialogTitle>
-      File not found!
-    </DialogTitle>
-    <DialogContent>
-     You need to upload file before going to this!  
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={handleClose}>Cancel</Button>
-      <Button onClick={() => {window.location.href="./overview"}} autoFocus>
-          Back to Overview
-          </Button>
-    </DialogActions>
-  </Dialog>
+  <FileNotFound open={open} setOpen={setOpen}/>
   </>
   )
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation} from 'react-router-dom';
 import './styles.scss';
-import logo from '../Img/justLogo.png'
+import logo from '../Img/Logo.png'
 import AvatarDropdown from './Dropdown.jsx'
 import { useAuth } from '../Auth/AuthContext.js';
 import Button from '@mui/material/Button';
@@ -10,7 +10,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { styled, alpha } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 
 const StyledMenu = styled((props) => (
     <Menu
@@ -40,6 +40,10 @@ const Header = () => {
     const forecastHandle = () => {
         setAnchorEl(null);
         window.location.href='./forecast';
+    };
+    const chatbotHandle = () => {
+        setAnchorEl(null);
+        window.location.href='./chatbot';
     };
 
     if (!isAuthorized) {
@@ -185,6 +189,7 @@ const Header = () => {
                     >
                     <MenuItem onClick={rfmHandle} sx={{color:'rgb(23 37 84)'}}>RFM Analysis</MenuItem>
                     <MenuItem onClick={forecastHandle} sx={{color:'rgb(23 37 84)'}}>Forecasting</MenuItem>
+                    <MenuItem onClick={chatbotHandle} sx={{color:'rgb(23 37 84)'}}>Chatbot</MenuItem>
                     </StyledMenu>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./dashboard'}}>Dashboard</Button>
                     <Button variant="text" sx ={{fontSize: '1rem', color: 'rgb(56 189 248)', fontWeight: 700}} onClick={()=>{window.location.href='./support'}}>Support</Button>

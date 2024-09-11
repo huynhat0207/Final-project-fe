@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {Form, Link } from 'react-router-dom';
+import {Link } from 'react-router-dom';
 import {Box, Paper} from '@mui/material/';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -9,72 +9,62 @@ import GetBackToTopButton from '../GetBackToTopButton';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material/';
 import {Dialog, DialogTitle, DialogContent, DialogActions} from '@mui/material/';
 import HomeIcon from '@mui/icons-material/Home';
-import { DataGrid } from '@mui/x-data-grid';
-import Papa from "papaparse";
-import { loadData, getData, getMappingFields } from '../Service/dataService';
+import { DataGrid} from '@mui/x-data-grid';
+import { loadData, getData, getMappingFields, deleteData } from '../Service/dataService';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import {default as SelectReact} from 'react-select'
-import { Input } from '@mui/material';
-import { useTimeout } from '@mui/x-data-grid/internals';
-import {keysDescription } from './keysDefine';
+import {keysDescription, option } from './keysDefine';
 import Loading from '../Loading';
+import { applyMappingFields, changeMappingFields } from '../Service/dataService';
 // import Select from 'react-select'
 // import Select from '@mui/material/Select';
 
 function Overview() {
+  // Define state
   const [data, setData] = useState([]);
-  const [columns, setColumnTest] = useState([]);
-  const [isReady, setIsReady] = useState(false);
+  const [columns, setColumns] = useState([]);
   const [open, setOpen] = useState(false);
   const [isUpload, setIsUpload] = useState(false);
-  const allowedExtensions = ["csv"];
-  // Define state
+  const [isMapping, setIsMapping] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [file, setFile] = useState("");
   const [type, setType] = useState("");
-  // Sample state
-  const [rows, setRows] = useState([
-    createData("id", "Transaction ID"),
-    createData("date", "Date"),
-  ]);
+  const [rows, setRows] = useState([]);
   // Define Ref
   const excelFileInputRef = useRef();
   const textFileInputRef = useRef();
   // Define data
-  const option = [
-    {value: "Transaction ID", label: "Transaction ID"},
-    {value: "Date", label: "Date"},
-    {value: "Time", label: "Time"},
-    {value: "Customer ID", label: "Customer ID"},
-    {value: "Product ID", label: "Product ID"},
-    {value: "Product Name", label: "Product Name"},
-    {value: "Category", label: "Category"},
-    {value: "Quantity", label: "Quantity"},
-    {value: "Unit Price", label: "Unit Price"},
-    {value: "Total Price", label: "Total Price"},
-    {value: "Payment Method", label: "Payment Method"},
-    {value: "Store Location", label: "Store Location"},
-    {value: "Discount", label: "Discount"},
-    {value: "Salesperson ID", label: "Salesperson ID"},
-    {value: "Profit Margin", label: "Profit Margin"},
-    {value: "Other", label: "Other"},
-  ];
+  // const option = [
+  //   {value: "Transaction ID", label: "Transaction ID"},
+  //   {value: "Date", label: "Date"},
+  //   {value: "Time", label: "Time"},
+  //   {value: "Customer ID", label: "Customer ID"},
+  //   {value: "Product ID", label: "Product ID"},
+  //   {value: "Product Name", label: "Product Name"},
+  //   {value: "Category", label: "Category"},
+  //   {value: "Quantity", label: "Quantity"},
+  //   {value: "Unit Price", label: "Unit Price"},
+  //   {value: "Total Price", label: "Total Price"},
+  //   {value: "Payment Method", label: "Payment Method"},
+  //   {value: "Store Location", label: "Store Location"},
+  //   {value: "Discount", label: "Discount"},
+  //   {value: "Salesperson ID", label: "Salesperson ID"},
+  //   {value: "Profit Margin", label: "Profit Margin"},
+  //   {value: "Other", label: "Other"},
+  // ];
   // Funtion
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  // const handleClickOpen = () => {
+  //   setOpen(true);
+  // };
   const handleClose = () => {
     setOpen(false);
   };
   const clearData = () => {
+    deleteData();
     setData([]);
     setIsUpload(false);
   };
@@ -110,33 +100,79 @@ function Overview() {
   ));
     return [];
   }
+  function generateRandom() {
+    var length = 8,
+        charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        retVal = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
+}
+  async function setMapping(){
+    var newMapping = {};
+    for (var i =0; i < rows.length; i++){
+      newMapping[rows[i].name] = rows[i].systemField;
+    }
+    if (isMapping){
+      const res = await changeMappingFields(newMapping);
+      console.log(res);
+      // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
+      const resData = await getData();
+      setData(resData.data);
+      setColumns(Object.keys(resData.data[0]))
+      // setData(resData.results);
+      // setColumns(Object.keys(resData.results[0]))
+    }
+    else{
+      const res = await applyMappingFields(newMapping);
+      console.log(res);
+      // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
+      const resData = await getData();
+      setData(resData.data);
+      setColumns(Object.keys(resData.data[0]))
+      // setData(resData.results);
+      // setColumns(Object.keys(resData.results[0]))
+    }
+  }
+  const handleApply = () => {
+    
+    setMapping();
+  }
+  // When upload file
+  async function getDataFromFile(){
+    try{
+    var resData = await getData();
+    setData(resData.data);
+    setColumns(Object.keys(resData.data[0]))
+    // setData(resData.results);
+    // setColumns(Object.keys(resData.results[0]))
+
+    setIsUpload(true);
+    if (resData){
+      var mappingData = await getMappingFields();
+      setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+    }
+    }
+    catch(error){
+      console.log(error);
+    }finally{
+      setLoading(false);
+    }
+  }
   async function submitFile(){
     setLoading(true);
     var resData = await loadData(file);
     setOpen(false);
     var mappingData = resData.mapping;
-    // var cols = Object.keys[mappingData];
     setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+    getDataFromFile()
   }
-  async function getDataFromFile(){
-        try{
-        var resData = await getData();
-        var mappingData = await getMappingFields();
-        setLoading(false)
-        setData(resData.data);
-        setColumnTest(Object.keys(resData.data[0]))
-        setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
-        setIsUpload(true);
-        }
-        catch(error){
-          console.log(error);
-        }
-      }
-  useEffect(() => {
-    if (file){
-      getDataFromFile()
-    }
-  },[file]);
+  // useEffect(() => {
+  //   if (file){
+  //     getDataFromFile()
+  //   }
+  // },[file]);
 
   // Check file is upload or not? 
   useEffect(()=>{
@@ -144,24 +180,28 @@ function Overview() {
       setLoading(true);
       try{
       var resData = await getData();
-      var mappingData = await getMappingFields();
       setData(resData.data);
-      setColumnTest(Object.keys(resData.data[0]));
-      setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+      // setData(resData.results);
       setIsUpload(true);
-      setLoading(false);
+      setColumns(Object.keys(resData.data[0]));
+      // setColumns(Object.keys(resData.results[0]))
+      if (resData){
+        var mappingData = await getMappingFields();
+        setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+      }
     }
       catch(error){
-        var res = error.response;
         console.log(error);
-        if (res.status === 404) {
-          setLoading(false);
-          setIsUpload(false);
-        }
+        setIsMapping(false);
+      }finally{
+        setLoading(false);
       }
     }
     checkFileIsUpload();
   },[]);
+  useEffect(()=>{
+    console.log(data)
+  },[data]);
   return (
     <div className='mx-32 mt-8 min-h-1000'>
       <div className='flex items-center text-deep-blue'>
@@ -240,7 +280,8 @@ function Overview() {
               }}
               pageSizeOptions={[10, 50, 100]}
               checkboxSelection
-              getRowId={(row)=>row[columns[0]]} /// Fix when add api
+              getRowId={(row)=> generateRandom()} /// Fix when add api
+              // slots={{ toolbar: GridToolbar }}
               sx={{
                 marginTop: 1, 
                 border:1, 
@@ -288,7 +329,7 @@ function Overview() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button variant='contained'>Apply</Button>
+      <Button variant='contained' onClick={handleApply}>Apply</Button>
       </>
       :<Loading title="I'm waiting for your data"/>
       }

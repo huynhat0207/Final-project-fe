@@ -25,27 +25,13 @@ export const getData = async (file) => {
         throw error;
     }
 }
-export const rfmAnalysis = async(time, money, id) => {
-    try {
-        const formData = new FormData();
-        formData.append('timestamp', time);
-        formData.append('monetary', money);
-        formData.append('customer', id);
-        const response = await api.post('/api/data/rfm/', formData);
-        return response.data;
-    }
-    catch(error){
-        console.error('Error when using rfm analysis:', error);
-        throw error;
-    }
-}
 
 export const getColumns = async() =>{
     try {
         const response = await api.get('/api/data/data-column/');
         return response.data;
     }catch(error){
-        console.error('Error when getting the columns\' name:', error);
+        // console.error('Error when getting the columns\' name:', error);
         throw error;
     }
 }
@@ -55,6 +41,32 @@ export const getMappingFields = async() => {
         const response = await api.get('/api/data/mapping/');
         // Return a dictionary
         return response.data.mapping;
+    }catch(error){
+        // console.error('Error when getting the mapping fields\' name:', error);
+        throw error;
+    }
+}
+
+export const applyMappingFields = async(mapping) => {
+    const formData = new FormData();
+    formData.append('mapping', JSON.stringify(mapping));
+    try{
+        const response = await api.post('/api/data/mapping/', formData);
+        // Return a dictionary
+        return response.data;
+    }catch(error){
+        // console.error('Error when getting the mapping fields\' name:', error);
+        throw error;
+    }
+}
+
+export const changeMappingFields = async(mapping) => {
+    const formData = new FormData();
+    formData.append('mapping', mapping);
+    try{
+        const response = await api.put('/api/data/mapping/', formData);
+        // Return a dictionary
+        return response.data;
     }catch(error){
         console.error('Error when getting the mapping fields\' name:', error);
         throw error;

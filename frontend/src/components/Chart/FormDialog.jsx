@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -11,21 +11,24 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import SingleValue from './Content/SingleValue';
-import Slider from '@mui/material/Slider';
-import { FormLabel } from '@mui/material';
+// import Slider from '@mui/material/Slider';
+import { FormLabel, Grid } from '@mui/material';
 import {Typography} from '@mui/material';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { BarChartApi, BoxPlotApi, HistogramApi, LineChartApi, PieChartApi, getData } from '../Service/chartService';
+import {getData } from '../Service/chartService';
+import { memo } from 'react';
 function FormDialog(props) {
     // Props
     const {title, open, setOpen, listOfCharts, setListOfCharts, listCols} = props;
     // States
     const [type, setType] = useState(null);
-    const [size, setSize] = useState(2);
+    // const [size, setSize] = useState(2);
+    const [width, setWidth] = useState(4);
+    const [height, setHeight] = useState(4);
     const [name, setName] = useState(null);
-    const [num, setNum] = useState(1);
+    // const [num, setNum] = useState(1);
     //States for Single value
     const [isMul, setIsMul] = useState('false');
     const [labelCol, setLabelCol] = useState(null);
@@ -34,9 +37,7 @@ function FormDialog(props) {
     const [func, setFunc] = useState(null);
 
     // Function
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const handleClose = useCallback(()=>setOpen(false));
 
     const handleChange = (e) => {
         setType(e.target.value);
@@ -69,9 +70,8 @@ function FormDialog(props) {
             setFields(listCols.map((item)=> ({value: item, name: item})));
         }
     },[listCols]);
-    const setData = async() => {
-        const data = await getData(type,isMul, func, xAxis, yAxis, labelCol);
-        setListOfCharts([...listOfCharts, {data:data, width: size, title: name, type: type, option:{ type: type, isMul: isMul, func:func, xAxis: xAxis, yAxis: yAxis, labelCol: labelCol}}]);
+    const setData = () => {
+        setListOfCharts([...listOfCharts, {width: parseInt(width), height:parseInt(height), title: name, type: type, option:{ type: type, isMul: isMul, func:func, xAxis: xAxis, yAxis: yAxis, labelCol: labelCol}}]);
     }
     return (
         <Dialog
@@ -115,10 +115,10 @@ function FormDialog(props) {
                 
                 {type === 'value' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                     Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -131,13 +131,21 @@ function FormDialog(props) {
                         max={5}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="func">Function</InputLabel>
                         <Select
                         labelId="func"
                         id="func-select"
-                        label="func"
+                        label="Function"
                         required
                         onChange={(e) => setFunc(e.target.value)}
                         >
@@ -149,7 +157,7 @@ function FormDialog(props) {
                         <Select
                         labelId="field"
                         id="field-select"
-                        label="Field"
+                        label="Value Field"
                         required
                         onChange={(e) => {setXAxis(e.target.value);}}
                         >
@@ -160,10 +168,10 @@ function FormDialog(props) {
                 </>}
                 {type === 'line' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                         Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -176,7 +184,15 @@ function FormDialog(props) {
                         max={4}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormControl>
                     <FormLabel id="demo-row-radio-buttons-group-label">Number of lines</FormLabel>
                     <RadioGroup
@@ -196,7 +212,7 @@ function FormDialog(props) {
                             <Select
                             labelId="label-field"
                             id="label-field-select"
-                            label="Label field"
+                            label="Label Field"
                             required
                             onChange={(e) => {setLabelCol(e.target.value);}}
                             >
@@ -211,7 +227,7 @@ function FormDialog(props) {
                         <Select
                         labelId="label-type"
                         id="label-type-select"
-                        label="Type Value"
+                        label="Function"
                         required
                         onChange={(e) => setFunc(e.target.value)}
                         >
@@ -246,10 +262,10 @@ function FormDialog(props) {
                 </>}
                 {type === 'bar' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                         Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -262,7 +278,15 @@ function FormDialog(props) {
                         max={4}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormLabel id="demo-row-radio-buttons-group-label">Number of lines</FormLabel>
                     <RadioGroup
                         row
@@ -293,7 +317,7 @@ function FormDialog(props) {
                         <Select
                         labelId="label-type"
                         id="label-type-select"
-                        label="Type Value"
+                        label="Function"
                         required
                         onChange={(e) => setFunc(e.target.value)}
                         >
@@ -328,10 +352,10 @@ function FormDialog(props) {
                 </>}
                 {type === 'pie' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                         Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -344,7 +368,15 @@ function FormDialog(props) {
                         max={4}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="label-type">Function</InputLabel>
                         <Select
@@ -385,10 +417,10 @@ function FormDialog(props) {
                 </>}
                 {type === 'box' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                         Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -401,8 +433,15 @@ function FormDialog(props) {
                         max={4}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
-
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="Label field">Label Field</InputLabel>
                         <Select
@@ -433,10 +472,10 @@ function FormDialog(props) {
                 </>}
                 {type === 'histogram' &&
                 <>
-                    <Typography>
+                    {/* <Typography>
                     Size
-                    </Typography>
-                    <Slider
+                    </Typography> */}
+                    {/* <Slider
                         aria-label="Size"
                         aria-labelledby="size-slider"
                         // defaultValue={2}
@@ -449,7 +488,15 @@ function FormDialog(props) {
                         max={5}
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                    />
+                    /> */}
+                    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid item xs={6}>
+                            <TextField label="Width" value={width} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setWidth(12)} else if(e.target.value <2){setWidth(2)} else {setWidth(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField label="Height" value={height} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setHeight(10)} else if (e.target.value <1) {setHeight(2)} else(setHeight(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+                        </Grid>
+                    </Grid>
                     <FormControl fullWidth sx={{marginTop:"10px"}}>
                         <InputLabel id="field">Values Field</InputLabel>
                         <Select
@@ -475,4 +522,4 @@ function FormDialog(props) {
 }
 
 
-export default FormDialog
+export default memo(FormDialog)

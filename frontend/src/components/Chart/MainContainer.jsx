@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, memo } from 'react'
 import { Card} from '@mui/material';
 import CardHeader from '@mui/material/CardHeader';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -19,26 +19,68 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CloseIcon from '@mui/icons-material/Close';
 import Histogram from './Content/Histogram';
+import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined';
+import {Grid, TextField, Button} from '@mui/material';
 // import AddDialog from './Dialog/AddDialog';
+import { useCallback } from 'react';
+
+const RenderChart = (props) => {
+  const {width, height, type, filter, option, signal} = props;
+  switch (type) {
+    case 'value':
+      return (<SingleValue width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+    case 'line':
+      return (<LineChart width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+    case 'bar':
+      return (<BarChart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+    case 'pie':
+      return (<PieChart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+    case 'box':
+      return (<BoxPlot width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+    case 'histogram':
+      return (<Histogram width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+    default:
+      return null;
+  }
+}
+
+const WindowedDialog = (props) => {
+  const {width, height, title, type, filter, option, signal, openDialog, setOpenDialog} = props;
+
+  const handleCloseDialog = useCallback(() => setOpenDialog(false), []);
+
+  return(
+    <Dialog
+      onClose={handleCloseDialog}
+      open={openDialog}
+      scroll="paper"
+    >
+      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <h3 className='font-bold text-xl text-dark-blue'>{title}</h3>
+      </DialogTitle>
+      <IconButton
+          aria-label="close"
+          onClick={handleCloseDialog}
+          sx={{
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: (theme) => theme.palette.grey[500],
+          }}
+      >
+          <CloseIcon />
+      </IconButton>
+      <DialogContent>
+        <RenderChart width={width} height={height} type={type} filter={filter} option={option} signal={signal}/>
+      </DialogContent>
+    </Dialog>)
+}
 
 function MainContainer(children) {
-  const {data, index, width, title, type, listOfCharts, setListOfCharts, props, setProps, layout, setLayout, option} = children;
-  const heightTypes ={
-    'value': 400,
-    'line': 400,
-    'histogram': 400,
-    'bar': 400,
-    'pie': 400,
-    'box' : 400,
-  }
-  const widthTypes ={
-    'value': 100,
-    'line': 200,
-    'histogram': 200,
-    'bar' : 200,
-    'pie': 200,
-    'box' : 200,
-  }
+  const {index, size, width, height, title, type, listOfCharts, setListOfCharts, props, setProps,filter, option, signal} = children;
+  const [w, setW] = React.useState(null);
+  const [h, setH] = React.useState(null);
+  // const [index, setIndex] = React.useState(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -50,36 +92,29 @@ function MainContainer(children) {
   };
 
   const [openDialog, setOpenDialog] = React.useState(false);
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
+  // const handleCloseDialog = () => {
+  //   setOpenDialog(false);
+  // };
+  const handleCloseDialog = useCallback(() => setOpenDialog(false), []);
+  const [openSizeDialog, setOpenSizeDialog] = React.useState(false);
+  const handleCloseSizeDialog = useCallback(() => setOpenSizeDialog(false), []);
 
   const DeleteChart = (index) => {
-    var layouttest = props.layout
-    var newLayout = layouttest.filter((val) => val.i !== String(index)).map((item, idx) => ({...item, i:String(idx)}))
+    var curLayout = props.layout
+    var newLayout = curLayout.filter((val) => val.i !== String(index)).map((item, idx) => ({...item, i:String(idx)}))
     setProps({layout: newLayout});
     // setLayout(layout.filter((val) => val.i !== String(index)).map((item, idx) => ({...item, i:String(idx)})))
     setListOfCharts(listOfCharts.filter((val, i) => i !== index));
   }
-
-  const RenderChart = (props) => {
-    const {type, data, option} = props;
-    switch (type) {
-      case 'value':
-        return (<SingleValue data={data}  column={option.label} cal={option.cal} />);
-      case 'line':
-        return (<LineChart data={data} width={widthTypes[type]*width} height={heightTypes[type]} option={option} />);
-      case 'bar':
-        return (<BarChart data={data} width={widthTypes[type]*width} height={heightTypes[type]} option={option}/>);
-      case 'pie':
-        return (<PieChart data={data} width={widthTypes[type]*width} height={heightTypes[type]} option={option}/>);
-      case 'box':
-        return (<BoxPlot data={data} width={widthTypes[type]*width} height={heightTypes[type]} option={option}/>);
-      case 'histogram':
-        return (<Histogram data={data} width={widthTypes[type]*width} height={heightTypes[type]} option={option}/>);
-      default:
-        return null;
-    }
+  useEffect(()=>{
+    console.log('Layout',props);
+  },[props]);
+  const ChangeSize = (index) => {
+    var curLayout = props.layout
+    var newLayout = curLayout.map((val) => (val.i === String(index))? {...val, w: parseInt(w), h: parseInt(h) } :val);
+    setProps({layout: newLayout});
+    setListOfCharts(listOfCharts.map((val, i) => (i === index)? {...val, width: w, height: h} : val))
+    setOpenSizeDialog(false);
   }
   return (
     <>
@@ -93,7 +128,7 @@ function MainContainer(children) {
           }
           sx={{padding:0}}
           />
-          <RenderChart type={type} data={data} option={option}/>
+          <RenderChart width={width} height={height} type={type} filter={filter} option={option} signal={signal}/>
       </Card>
       <Menu
         id="basic-menu"
@@ -105,9 +140,10 @@ function MainContainer(children) {
         }}
       >
         <MenuItem onClick={() => DeleteChart(index)}><DeleteOutlineIcon/> Remove</MenuItem>
-        <MenuItem onClick={() => setOpenDialog(true)} ><ZoomOutMapIcon/> Windowed</MenuItem>
+        <MenuItem onClick={() => {setOpenDialog(true); handleClose()}} ><ZoomOutMapIcon/> Windowed</MenuItem>
+        <MenuItem onClick={() => {setOpenSizeDialog(true); handleClose()}} ><AspectRatioOutlinedIcon/> Change Size</MenuItem>
       </Menu>
-      <Dialog
+      {/* <Dialog
         onClose={handleCloseDialog}
         open={openDialog}
         scroll="paper"
@@ -128,11 +164,47 @@ function MainContainer(children) {
             <CloseIcon />
         </IconButton>
         <DialogContent>
-          <RenderChart type={type} data={data} option={option}/>
+          <RenderChart type={type} option={option}/>
         </DialogContent>
+      </Dialog> */}
+      <WindowedDialog width={width} height={height} title={title} type={type} filter={filter} option={option} signal={signal} openDialog={openDialog} setOpenDialog={setOpenDialog}/>
+
+      <Dialog
+        onClose={handleCloseSizeDialog}
+        open={openSizeDialog}
+        scroll="paper"
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          <h3 className='font-bold text-xl text-dark-blue'>Change size:</h3>
+        </DialogTitle>
+        <IconButton
+            aria-label="close"
+            onClick={handleCloseSizeDialog}
+            sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+            }}
+        >
+            <CloseIcon />
+        </IconButton>
+        <DialogContent>
+          <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+              <Grid item xs={6}>
+                  <TextField label="Width" defaultValue={width} value={w} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 12){setW(12)} else if(e.target.value <2){setW(2)} else {setW(e.target.value)}}} type="number" inputProps={{ min: 2, max: 12, step: 1 }}/>
+              </Grid>
+              <Grid item xs={6}>
+                  <TextField label="Height" defaultValue={height} value={h} fullWidth variant="outlined" sx={{marginTop:"10px"}} onChange={(e)=>{if(e.target.value > 10) {setH(10)} else if (e.target.value <1) {setH(2)} else(setH(e.target.value))}} type="number" inputProps={{ min: 1, max: 10, step: 1 }}/>
+              </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={()=>ChangeSize(index)}>Apply</Button>
+        </DialogActions>
       </Dialog>
     </>
   )
 }
 
-export default MainContainer
+export default memo(MainContainer)

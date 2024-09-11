@@ -2,17 +2,11 @@ import React, {useState} from 'react'
 import '../../styles/Support.css'
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
-import Divider from '@mui/material/Divider';
-import MenuIcon from '@mui/icons-material/Menu';
-import DirectionsIcon from '@mui/icons-material/Directions';
-import { Button } from '@mui/material';
-// import IconButton from '@mui/icons-material/IconButton';
+import { Button, Divider } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
-import ListSubheader from '@mui/material/ListSubheader';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -28,11 +22,9 @@ const NestedList = (props) => {
   return(
     <>
     <ListItemButton onClick={handleClick}>
-        {/* <ListItemIcon>
-          <InboxIcon />
-        </ListItemIcon> */}
         <ListItemText primary={question} 
           primaryTypographyProps={{
+          color:'rgb(0 43 154)',
           fontSize: 20,
           fontWeight: 'bold',
           letterSpacing: 0,
@@ -42,10 +34,11 @@ const NestedList = (props) => {
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText primary={answer} />
+            <ListItemText primary={answer} sx={{color:'rgb(0 43 154)'}}/>
           </ListItemButton>
         </List>
       </Collapse>
+      <Divider/>
     </>
   )
 }
@@ -85,18 +78,35 @@ export default function Support() {
     }
   };
   const dataFiltered = filterData(searchQuery, data);
-
+  const SearchQuestionsandAnswer = [
+    {quest: "What is the size of the dataset and how much datea will I need to get from each one?", answer: "Base on the selected work you choose, "},
+    {quest: "", answer: ""},
+    {quest: "", answer: ""},
+  ]
+  const FrequencyQuestionsandAnswer = [
+    {quest: "What is the size of the dataset and how much datea will I need to get from each one?", answer: "Base on the selected work you choose, "},
+    {quest: "", answer: ""},
+    {quest: "", answer: ""},
+  ]
   return (
     <div className='support-body'>
       <h1 className='text-white font-bold text-5xl pt-12 pb-0 z-10'>Welcome! How can we help?</h1>
       <h2 className='text-white text-xl pt-4 pb-6 z-10'>Search in our help center for quick answers</h2>
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      {isSearch? null:
+      {isSearch?
         <div className='flex flex-col mt-20 w-1/2 rounded-2xl bg-white items-center z-10'>
-          <h1 className='font-bold text-4xl mt-4'>Frequently asked questions</h1>
-          <h2 className='mt-2'>May be you can find your answer here!</h2>
+          <h1 className='font-bold text-4xl mt-4'>Most relevant search results</h1>
+          <h2 className='mt-2'>All answers related to your search will be displayed</h2>
           <List sx={{width:'100%'}} >
-            <NestedList question="quest 1" answer="answer 1"/>
+            {SearchQuestionsandAnswer.map((item) => <NestedList question={item.quest} answer={item.answer}/>)}     
+          </List>
+        </div>
+      :
+        <div className='flex flex-col mt-20 w-1/2 rounded-2xl bg-white items-center z-10'>
+          <h1 className='font-bold text-4xl mt-4 text-deep-blue'>Frequently asked questions</h1>
+          <h2 className='mt-2 '>May be you can find your answer here!</h2>
+          <List sx={{width:'100%'}} >
+            {FrequencyQuestionsandAnswer.map((item) => <NestedList question={item.quest} answer={item.answer}/>)}     
           </List>
         </div>
       }

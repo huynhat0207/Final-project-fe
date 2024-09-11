@@ -9,18 +9,14 @@ import Badge from '@mui/material/Badge';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import Paper from '@mui/material/Paper';
+// import Paper from '@mui/material/Paper';
 import MenuList from '@mui/material/MenuList';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import EditIcon from '@mui/icons-material/Edit';
+// import EditIcon from '@mui/icons-material/Edit';
 import Box from '@mui/material/Box';
 import api from "../Service/apiService";
-// import Acount from '../Management/Acount';
-// import Stack from '@mui/material/Stack';
-
-// import Avatar from '@mui/material/Avatar';
 import { useNavigate } from 'react-router-dom';
 import Account from '../Management/Account';
 
@@ -43,7 +39,7 @@ const AvatarDropdown = () => {
     //TODO
   }
   function pressLogout(){
-    setAnchorEl(null);
+    // setAnchorEl(null);
     navigate('/logout');
   }
   const handleClick = (event) => {
