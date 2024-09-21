@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js'
 import { getData } from "../../Service/chartService";
 
 function Histogram(props) {
-    const {data, width, height, filter, option, signal} = props;
+    const {width, height, filter, option, signal} = props;
     const [dataChart, setDataChart] = useState([]);
     useEffect(()=>{
         async function fetchDate(){

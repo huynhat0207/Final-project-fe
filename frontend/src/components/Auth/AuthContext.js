@@ -1,8 +1,7 @@
 // AuthContext.js
 import React from 'react';
 import { ACCESS_TOKEN } from './constants';
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import api from '../Service/apiService';
+import { createContext, useContext, useMemo } from "react";
 
 const AuthContext = createContext();
 

@@ -1,10 +1,9 @@
 import React, {useEffect, useState, memo} from "react";
 import Plot from 'react-plotly.js'
 import { getData } from "../../Service/chartService";
-import { LineChartApi } from "../../Service/chartService";
 
 function LineChart(props) {
-  const {data, width, height, filter, option, signal} = props;
+  const {width, height, filter, option, signal} = props;
   const [dataChart, setDataChart] = useState([]);
   useEffect(()=>{
     async function fetchDate(){

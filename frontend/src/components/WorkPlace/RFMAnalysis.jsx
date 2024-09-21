@@ -1,8 +1,8 @@
-import {React, useState, forwardRef, Fragment, useEffect, useRef} from 'react'
+import {React, useState, useEffect, useRef} from 'react'
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 // import SummarizeIcon from '@mui/icons-material/Summarize';
-import { Grid } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import { DataGrid, GridToolbar} from '@mui/x-data-grid';
 // import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
@@ -28,19 +28,8 @@ import ListItemText from '@mui/material/ListItemText';
 import SquareIcon from '@mui/icons-material/Square';
 import { rfmClassification } from './keysDefine';
 import ListSubheader from '@mui/material/ListSubheader';
-import { exportComponentAsJPEG, exportComponentAsPDF, exportComponentAsPNG } from 'react-component-export-image';
-
-const dataColumns = [
-  { dataKey: 'Customer ID', label: 'ID', width: 70 },
-  { dataKey: 'Recency', label: 'Recency', width: 130, numeric: true, },
-  { dataKey: 'Frequency', label: 'Frequency', width: 130, numeric: true, },
-  { dataKey: 'Monetary', label: 'Monetary', width: 130, numeric: true, },
-  { dataKey: 'R_Score', label: 'R Score', width: 130, numeric: true, },
-  { dataKey: 'F_Score', label: 'F Score', width: 130, numeric: true, },
-  { dataKey: 'M_Score', label: 'M Score', width: 130, numeric: true, },
-  { dataKey: 'RFM_Score', label: 'RFM Score', width: 130, numeric: true, },
-  { dataKey: 'Customer_segment', label: 'Customer Segment', width: 130 },
-];
+import { exportComponentAsPNG } from 'react-component-export-image';
+import NavButton from './NavButton';
 
 const RFMChart = (props) => {
   const {exportPNG, total, counts} = props;
@@ -70,7 +59,7 @@ const RFMChart = (props) => {
         </div>
         
         <div className='flex flex-col pl-2'>
-          {[1,2,3,4,5].map((val) => <div className='text-3xl font-bold w-8 h-12 flex-1'>{val}</div>)}
+          {[1,2,3,4,5].map((val) => <div key={val} className='text-3xl font-bold w-8 h-12 flex-1'>{val}</div>)}
         </div>
       </div>
 
@@ -165,6 +154,7 @@ function RFMAnalysis() {
   const [id, setId] = useState(null);
   const [monetary, setMonetary] = useState(null);
   const [open, setOpen] = useState(false);
+  const [change, setChange] = useState(false);
   const exportPNG = useRef();
 
   async function handleApply(){
@@ -243,63 +233,81 @@ function RFMAnalysis() {
       <AddToPhotosIcon sx={{height:"auto", width:"36px"}} />
       <h2 className=" font-sans text-3xl font-bold"> Select Data</h2>
     </div>
-    <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} sx={{paddingTop: 2}} >
-      <Grid item xs={2} sm={4} md={4} key="recency">
-      <div className='bg-white rounded-lg p-1 h-36'>
-          <div className="font-bold pl-1">Recency Data: </div>
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                  <InputLabel id="demo-select-small-label" >Data</InputLabel>
-                  <Select
-                  labelId="demo-select-small-label"
-                  // id=""
-                  value={recency ?? ""}
-                  label="DataRecency"
-                  onChange={(e) => setRecency(e.target.value)}
-                  >
-                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                  </Select>
-                  <FormHelperText>Select the name of the column containing data about recency.</FormHelperText>
-          </FormControl>
-          </div>
+    {!change? 
+    <>
+      <div className='flex flex-col items-center'>
+        <div className='flex flex-col w-500 items-center bg-white p-2'>
+          <h1 className='text-4xl font-bold text-vivid-pink'>Instruction</h1>
+          <h2 className='text-lg text-center text-deep-blue pt-1'>You can apply without selecting data, the system will automatically use the default columns for <strong className='text-vivid-pink'> Customer Identification, Transaction Date, and Profit</strong>. Alternatively, you can switch to manual mode if the required columns are missing, and you can replace them with other equivalent data columns.</h2>
+          <Stack sx={{display:'flex', flexDirection:'row', gap:1, marginTop:2}}>
+            <Button variant='contained' onClick={handleApply}>Apply</Button>
+            <Button variant='outlined' onClick={()=>setChange(true)}>Switch to Manual</Button>
+          </Stack>
+        </div>
+      </div>
+    </>
+    :<>
+      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }} sx={{paddingTop: 2}} >
+        <Grid item xs={2} sm={4} md={4} key="recency">
+        <div className='bg-white rounded-lg p-1 h-36'>
+            <div className="font-bold pl-1">Recency Data: </div>
+            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                    <InputLabel id="demo-select-small-label" >Data</InputLabel>
+                    <Select
+                    labelId="demo-select-small-label"
+                    // id=""
+                    value={recency ?? ""}
+                    label="DataRecency"
+                    onChange={(e) => setRecency(e.target.value)}
+                    >
+                    {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                    </Select>
+                    <FormHelperText>Select the name of the column containing data about recency.</FormHelperText>
+            </FormControl>
+            </div>
+        </Grid>
+        <Grid item xs={2} sm={4} md={4} key="monetary">
+            <div className='bg-white rounded-lg p-1 h-36'>
+            <div className="font-bold pl-1">Monetary Data: </div>
+            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                    <InputLabel id="demo-select-small-label">Data</InputLabel>
+                    <Select
+                    labelId="demo-select-small-label"
+                    // id=""
+                    value={monetary ?? ""}
+                    label="DataRecency"
+                    onChange={(e) => setMonetary(e.target.value)}
+                    >
+                    {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                    </Select>
+                    <FormHelperText>Select the name of the column containing data about monetary.</FormHelperText>
+            </FormControl>
+            </div>
+        </Grid>
+        <Grid item xs={2} sm={4} md={4} key="customer">
+            <div className='bg-white rounded-lg p-1 h-36'>
+            <div className="font-bold pl-1">Customer Index: </div>
+            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                    <InputLabel id="demo-select-small-label">Data</InputLabel>
+                    <Select
+                    labelId="demo-select-small-label"
+                    // id=""
+                    value={id ?? ""}
+                    label="DataRecency"
+                    onChange={(e) => setId(e.target.value)}
+                    >
+                    {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                    </Select>
+                    <FormHelperText>Select the name of the column containing data about customer identity.</FormHelperText>
+            </FormControl>
+            </div>
+        </Grid>
       </Grid>
-      <Grid item xs={2} sm={4} md={4} key="monetary">
-          <div className='bg-white rounded-lg p-1 h-36'>
-          <div className="font-bold pl-1">Monetary Data: </div>
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                  <InputLabel id="demo-select-small-label">Data</InputLabel>
-                  <Select
-                  labelId="demo-select-small-label"
-                  // id=""
-                  value={monetary ?? ""}
-                  label="DataRecency"
-                  onChange={(e) => setMonetary(e.target.value)}
-                  >
-                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                  </Select>
-                  <FormHelperText>Select the name of the column containing data about monetary.</FormHelperText>
-          </FormControl>
-          </div>
-      </Grid>
-      <Grid item xs={2} sm={4} md={4} key="customer">
-          <div className='bg-white rounded-lg p-1 h-36'>
-          <div className="font-bold pl-1">Customer Index: </div>
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                  <InputLabel id="demo-select-small-label">Data</InputLabel>
-                  <Select
-                  labelId="demo-select-small-label"
-                  // id=""
-                  value={id ?? ""}
-                  label="DataRecency"
-                  onChange={(e) => setId(e.target.value)}
-                  >
-                  {columns.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                  </Select>
-                  <FormHelperText>Select the name of the column containing data about customer identity.</FormHelperText>
-          </FormControl>
-          </div>
-      </Grid>
-    </Grid>
-      <Button variant='contained' sx={{marginTop: 2}} onClick={handleApply}>Apply</Button>
+      <Stack sx={{display:'flex', flexDirection:'row', gap:1, marginTop: 2}}>
+        <Button variant='contained' onClick={handleApply}>Apply</Button>
+        <Button variant='outlined' onClick={()=>setChange(false)}>Switch to Manual</Button>
+      </Stack>
+    </>}
     <div className='flex text-vivid-blue mt-2'>
       <AssessmentIcon sx={{height:"auto", width:"36px"}} />
       <h2 className=" font-sans text-3xl font-bold"> Analysis Result</h2>
@@ -308,7 +316,7 @@ function RFMAnalysis() {
     {isApply?
     <>
     <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
-      <ClearAllOutlinedIcon/> Top RFM Score
+      <ClearAllOutlinedIcon/> RFM Score Table
     </h2>
     <div className='h-500 w-full my-2 mx-0 flex flex-col'>
       <DataGrid
@@ -326,7 +334,7 @@ function RFMAnalysis() {
         sx={{
           marginTop: 1, 
           border:1, 
-          // borderColor:'#38bdf8', 
+          borderColor:'#rgb(0 43 154)', 
           color:'#0D2A41',
           '& .MuiDataGrid-cell:hover': {color: 'rgb(13 42 65)',}
         }}
@@ -345,6 +353,7 @@ function RFMAnalysis() {
     }
   </div>
   <FileNotFound open={open} setOpen={setOpen}/>
+  <NavButton/>
   </>
   )
 }

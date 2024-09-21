@@ -1,12 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api from "../Service/apiService";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 // import LoadingIndicator from "./LoadingIndicator";
 import { Link } from "react-router-dom";
-import { useAuth } from "./AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
-import { loginAuth } from "../Service/authService";
 import logo from '../Img/Logo.png'
 
 function evaluatePasswordStrength(password) {

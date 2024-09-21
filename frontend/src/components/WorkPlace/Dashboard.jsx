@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import { Button, Dialog, InputLabel} from '@mui/material';
@@ -26,6 +26,8 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import { SingleValueApi } from '../Service/chartService';
 import TextField from '@mui/material/TextField';
 import FileNotFound from './FileNotFound';
+import MiniChatbot from './MiniChatbot';
+import NavButton from './NavButton';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -50,13 +52,14 @@ const FilterDialog = (props) => {
     return {min: res1.value, max: res2.value};
   }
   async function addFilterList(){
+    var res;
     if (!filterColumns.includes(cur)){
       if (keysApi[cur] === 'include'){
-        var res = await getUnique(cur);
+        res = await getUnique(cur);
         setFilterColumns(filterColumns => [...filterColumns, {'column': cur, 'type': keysApi[cur], 'values':res , 'defaultValues': res}]);
       }
       else{
-        var res = await getRange(cur)
+        res = await getRange(cur)
         setFilterColumns(filterColumns => [...filterColumns, {'column': cur, 'type': keysApi[cur],'from_to': [res.min, res.max], 'min': res.min, 'max': res.max}]);
       }
     }
@@ -97,7 +100,7 @@ const FilterDialog = (props) => {
           required
           onChange={(e) => {setCur(e.target.value);}}
           >
-              {columns.map((item)=> <MenuItem value={item}> {item} </MenuItem>)}
+              {columns.map((item)=> <MenuItem key={item} value={item}> {item} </MenuItem>)}
           </Select>
       </FormControl>
     </DialogContent>
@@ -109,8 +112,6 @@ const FilterDialog = (props) => {
 }
 
 function Dashboard() {
-  const [data, setData] = useState([]);
-  const [isUpload, setIsUpload] = useState(false);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
@@ -124,16 +125,6 @@ function Dashboard() {
       layout:[],
     }
   );
-  useEffect(()=>{
-    if (props.layout.length < listOfCharts.length) {
-      var index = listOfCharts.length -1;
-      var width = listOfCharts[index].width;
-      var height = listOfCharts[index].height;
-      var newLayout = props.layout;
-      newLayout.push({i: String(index), x: 0, y: 0, w: width, h: height})
-      setProps({layout:newLayout})
-    }
-  },[listOfCharts]);
 
   function clearAll(){
     setListOfCharts([]);
@@ -141,31 +132,6 @@ function Dashboard() {
       layout:[],
     })
   };
-  // function handleCloseDialog(){
-  //   setOpenDialog(false);
-  // }
-  // const getUnique = async (value) => {
-  //   const res = await SingleValueApi('unique', value);
-  //   return res.value;
-  // }
-  // const getRange = async(value) => {
-  //   const res1 = await SingleValueApi('min', value);
-  //   const res2 = await SingleValueApi('max', value);
-  //   return {min: res1.value, max: res2.value};
-  // }
-  // async function addFilterList(){
-  //   if (!filterColumns.includes(cur)){
-  //     if (keysApi[cur] === 'include'){
-  //       var res = await getUnique(cur);
-  //       setFilterColumns(filterColumns => [...filterColumns, {'column': cur, 'type': keysApi[cur], 'values':[] , 'defaultValues': res}]);
-  //     }
-  //     else{
-  //       var res = await getRange(cur)
-  //       setFilterColumns(filterColumns => [...filterColumns, {'column': cur, 'type': keysApi[cur],'from_to': [res.min, res.max], 'min': res.min, 'max': res.max}]);
-  //     }
-  //   }
-  //   setOpenDialog(false);
-  // }
   async function applyFilter(){
     setSignal(!signal);
   }
@@ -181,14 +147,15 @@ function Dashboard() {
     const {
       target: { value },
     } = event;
+    var ft;
     if (isMin){
       // var temp = filterColumns;
-      var ft = filterColumns[index].from_to;
+      ft = filterColumns[index].from_to;
       ft[0] = parseInt(value);
       setFilterColumns(filterColumns.map((item, idx) => ( idx === index)? {...item, from_to: ft } : item ))
     }
     else {
-      var ft = filterColumns[index].from_to;
+      ft = filterColumns[index].from_to;
       ft[1] = parseInt(value);
       setFilterColumns(filterColumns.map((item, idx) => ( idx === index)? {...item, from_to: ft } : item ))
     }
@@ -197,19 +164,29 @@ function Dashboard() {
     const {
       target: { value },
     } = event;
-    console.log(value);
+    var ft;
     if (isMin){
       // var temp = filterColumns;
-      var ft = filterColumns[index].from_to;
+      ft = filterColumns[index].from_to;
       ft[0] = value;
       setFilterColumns(filterColumns.map((item, idx) => ( idx === index)? {...item, from_to: ft } : item ))
     }
     else {
-      var ft = filterColumns[index].from_to;
+      ft = filterColumns[index].from_to;
       ft[1] = value;
       setFilterColumns(filterColumns.map((item, idx) => ( idx === index)? {...item, from_to: ft } : item ))
     }
   };
+  useEffect(()=>{
+    if (props.layout.length < listOfCharts.length) {
+      var index = listOfCharts.length -1;
+      var width = listOfCharts[index].width;
+      var height = listOfCharts[index].height;
+      var newLayout = props.layout;
+      newLayout.push({i: String(index), x: 0, y: 0, w: width, h: height})
+      setProps({layout:newLayout})
+    }
+  },[listOfCharts]);
   useEffect(()=>{
     const getFields = async ()=>{
       const data = await getMappingFields().catch((error)=>{
@@ -222,12 +199,12 @@ function Dashboard() {
     }
     getFields();
   },[]);
-  useEffect(()=>{
-    console.log(props)
-  },[props])
-  useEffect(()=>{
-    console.log(filterColumns);
-  },[filterColumns])
+  // useEffect(()=>{
+  //   console.log(props)
+  // },[props])
+  // useEffect(()=>{
+  //   console.log(filterColumns);
+  // },[filterColumns])
   // useEffect(()=>{
   //   function fetchJSONData() {
   //     var data = require('./test.json');
@@ -327,46 +304,7 @@ function Dashboard() {
       <FormDialog title="Add Visualization" open={open} setOpen={setOpen} listOfCharts={listOfCharts} setListOfCharts={setListOfCharts} type='add' listCols={columns}/>
       <FilterDialog columns={columns} openDialog={openDialog} setOpenDialog={setOpenDialog} cur={cur} setCur={setCur} filterColumns={filterColumns} setFilterColumns={setFilterColumns}/>
       <FileNotFound open={openWarning} setOpen={setOpenWarning}/>
-      {/* <Dialog
-        onClose={handleCloseDialog}
-        open={openDialog}
-        scroll="paper"
-      >
-        <DialogTitle sx={{ m: 0,p:2, paddingRight:8 }} id="customized-dialog-title">
-          <h3 className='font-bold text-xl text-dark-blue'>Choose field you want to add filter:</h3>
-          
-        </DialogTitle>
-        <IconButton
-            aria-label="close"
-            onClick={handleCloseDialog}
-            sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        <DialogContent>
-          <FormControl fullWidth sx={{marginTop:"10px"}}>
-              <InputLabel id="field">Field</InputLabel>
-              <Select
-              labelId="field"
-              id="field-select"
-              label="Field"
-              required
-              onChange={(e) => {setCur(e.target.value);}}
-              >
-                  {columns.map((item)=> <MenuItem value={item}> {item} </MenuItem>)}
-              </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{margin:"2px 4px"}} onClick={()=>setOpenDialog(false)}>Close</Button>
-          <Button variant='contained' sx={{margin:"2px 4px"}} onClick={addFilterList}>Set</Button>
-        </DialogActions>
-      </Dialog> */}
+      <NavButton/>      
     </div>
   )
 }

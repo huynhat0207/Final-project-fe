@@ -7,7 +7,7 @@ import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
-import GetBackToTopButton from './GetBackToTopButton';
+import GetBackToTopButton from './WorkPlace/GetBackToTopButton';
 import Img1 from './Img/homepage1.png';
 import TextField from '@mui/material/TextField';
 function HomePage() {

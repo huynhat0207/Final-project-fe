@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {Link} from 'react-router-dom'
 import HomeIcon from '@mui/icons-material/Home'
 import Select from '@mui/material/Select';
@@ -10,7 +10,6 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -25,13 +24,16 @@ import LoadingDialog from '../LoadingDialog';
 import { getColumns } from '../Service/dataService';
 import { SingleValueApi } from '../Service/chartService';
 import CircularProgress from '@mui/material/CircularProgress';
+import NavButton from './NavButton';
 const FilterDialog = (props) =>{
+    // Define state
     const {open, setOpen, filter, setFilter} = props;
     const [cols, setCols] = React.useState([]);
     const [cur, setCur] = React.useState('');
     const [values, setValues] = React.useState('');
     const [val, setVal] = React.useState('');
     const [loading, setLoading] = React.useState(true);
+    // Funtion
     const handleClose = () =>{
         setOpen(false);
     }
@@ -44,6 +46,7 @@ const FilterDialog = (props) =>{
         }
         setOpen(false);
     }
+    // React Hook
     useEffect(()=>{
         var cols;
         async function getCols() {
@@ -57,7 +60,6 @@ const FilterDialog = (props) =>{
           }
         }
         getCols();
-        console.log(val)
       },[]);
     useEffect(()=>{
         async function getValues() {
@@ -78,7 +80,6 @@ const FilterDialog = (props) =>{
           }
           getValues();
     },[cur]);
-
     return(
         <Dialog
         open={open}
@@ -252,39 +253,6 @@ function Forecasting() {
                     <div className='bg-white rounded-lg p-1 h-auto'>
                     <div className="font-bold pl-1">Filter by: </div>
                     <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                        {/* <InputLabel id="demo-select-small-label">Data</InputLabel> */}
-                        {/* <Select
-                        labelId="demo-select-small-label"
-                        value={selectedNames ?? ''}
-                        // defaultValue={}
-                        onChange={(e) => setSelectedNames(e.target.value)}
-                        multiple
-                        label="Data"
-                        // onChange={(e) => setId(e.target.value)}
-                        input={<OutlinedInput label="Data" maxRows={1} />}
-                        renderValue={(selected) => (
-                            <Stack gap={1} direction="row" flexWrap="wrap">
-                                {selected.map((value) => (
-                                    <Chip 
-                                        key={value} 
-                                        label={value} 
-                                        onDelete={() =>
-                                            setSelectedNames(
-                                            selectedNames.filter((item) => item !== value)
-                                            )
-                                        }
-                                        deleteIcon={
-                                        <CancelIcon
-                                            onMouseDown={(event) => event.stopPropagation()}
-                                        />
-                                        }
-                                    
-                                    />))}
-                            </Stack>
-                        )}
-                        >
-                        {listSample.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                        </Select> */}
                         <Autocomplete
                             clearIcon={false}
                             options={[]}
@@ -307,7 +275,7 @@ function Forecasting() {
                                   />
                                 ))
                             }
-                            // readOnly
+                            readOnly
                             value={changeForm()}
                             // onChange={(e)=>setFilter([...filter, e.target.value])}
                             renderInput={(params) => <TextField label="Filter Tags" inputProps={{ readOnly: true }} {...params} />}
@@ -329,7 +297,7 @@ function Forecasting() {
             </div>
             {isApply?<>
             <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
-                <InsightsIcon/> Predict by {metric} (Next 30 days)
+                <InsightsIcon/> Predict by {metric} (Next {time} days)
             </h2>
             <div className='mt-4'>
                 <Plot
@@ -343,57 +311,60 @@ function Forecasting() {
                             type: 'scatter'
                         },
                     ]}
-                    layout={{width: 1200, height:600, title: metric+" in 30 days next" }}
+                    layout={{width: 1200, height:600, title: metric+" in "+ time +" days next" }}
                 />
             </div>
             <h2 className=' text-xl font-bold text-deep-blue my-2 border-b-2 border-deep-blue'> 
                 <InsightsIcon/> Training Result Chart
             </h2>
             <div className='flex flex-col items-center mt-4'>
-                <Grid 
-                    container 
-                    spacing={{ xs: 2, md: 3 }} 
-                    columns={{ xs: 4, sm: 8, md: 12 }} 
-                    flexWrap='wrap'
-                    sx={{paddingTop: 2}} 
-                >
-                    <Grid item xs={2} sm={4} md={4} key="recency">
-                        <Card>
-                            <CardContent>
-                                <Typography color="textSecondary" gutterBottom variant="body2" sx={{fontWeight: 600, color:'#813b80'}}>
-                                    Mean Square Error
-                                </Typography>
-                                <Typography variant="h3" sx={{width:'100%', color:'#582857', overflow: 'hidden', textOverflow:'ellipsis'}}>
-                                    {mse}
-                                </Typography>
-                            </CardContent>
-                        </Card>
+                <div className='w-3/4'>
+                    <Grid 
+                        container 
+                        spacing={{ xs: 2, md: 3 }} 
+                        columns={{ xs: 4, sm: 8, md: 12 }} 
+                        flexWrap='wrap'
+                        sx={{paddingTop: 2, width:'70%'}}
+
+                    >
+                        <Grid item xs={3} sm={6} md={6} key="recency">
+                            <Card>
+                                <CardContent>
+                                    <Typography color="textSecondary" gutterBottom variant="body2" sx={{fontWeight: 600, color:'#813b80'}}>
+                                        Mean Square Error
+                                    </Typography>
+                                    <Typography variant="h3" sx={{width:'100%', color:'#582857', overflow: 'hidden', textOverflow:'ellipsis'}}>
+                                        {mse}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        <Grid item xs={3} sm={6} md={6} key="recency">
+                            <Card>
+                                <CardContent>
+                                    <Typography gutterBottom variant="body2" sx={{fontWeight: 600, color: '#101079'}}>
+                                        Mean Absolute Error
+                                    </Typography>
+                                    <Typography variant="h3" sx={{width:'100%', color: '#070779', overflow: 'hidden', textOverflow:'ellipsis'}} >
+                                        {mae}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        {/* <Grid item xs={2} sm={4} md={4} key="recency">
+                            <Card>
+                                <CardContent >
+                                    <Typography gutterBottom variant="body2" sx={{fontWeight: 600, color: '#107910'}}>
+                                        Sum of Predict Values
+                                    </Typography>
+                                    <Typography variant="h3" sx={{width:'100%', color: '#077907', overflow: 'hidden', textOverflow:'ellipsis'}} >
+                                        
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid> */}
                     </Grid>
-                    <Grid item xs={2} sm={4} md={4} key="recency">
-                        <Card>
-                            <CardContent>
-                                <Typography gutterBottom variant="body2" sx={{fontWeight: 600, color: '#101079'}}>
-                                    Mean Absolute Error
-                                </Typography>
-                                <Typography variant="h3" sx={{width:'100%', color: '#070779', overflow: 'hidden', textOverflow:'ellipsis'}} >
-                                    {mae}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={2} sm={4} md={4} key="recency">
-                        <Card>
-                            <CardContent >
-                                <Typography gutterBottom variant="body2" sx={{fontWeight: 600, color: '#107910'}}>
-                                    Sum of Predict Values
-                                </Typography>
-                                <Typography variant="h3" sx={{width:'100%', color: '#077907', overflow: 'hidden', textOverflow:'ellipsis'}} >
-                                    {/* {value} */}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
+                </div>
                 <Divider></Divider>
                 <div className='mt-4'>
                 <Plot
@@ -427,6 +398,7 @@ function Forecasting() {
         </div>
         <LoadingDialog open={loading} message='Please wait as this may take a few minutes...'/>
         <FilterDialog open={open} setOpen={setOpen} filter={filter} setFilter={setFilter} />
+        <NavButton/>
         </>
     )
 }

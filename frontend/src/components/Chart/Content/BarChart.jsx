@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react'
 import Plot from 'react-plotly.js'
 import { getData } from '../../Service/chartService';
+
 function BarChart(props) {
-  const {data, width, height, filter, option, signal} = props;
+  const {width, height, filter, option, signal} = props;
   const [dataChart, setDataChart] = useState([]);
   useEffect(()=>{
       async function fetchDate(){

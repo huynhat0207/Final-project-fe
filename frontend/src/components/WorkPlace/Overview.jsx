@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {Link } from 'react-router-dom';
+import {Link, unstable_usePrompt} from 'react-router-dom';
 import {Box, Paper} from '@mui/material/';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import PreviewIcon from '@mui/icons-material/Preview';
 import EditIcon from '@mui/icons-material/Edit';
-import GetBackToTopButton from '../GetBackToTopButton';
+import GetBackToTopButton from './GetBackToTopButton';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material/';
 import {Dialog, DialogTitle, DialogContent, DialogActions} from '@mui/material/';
 import HomeIcon from '@mui/icons-material/Home';
@@ -19,9 +19,31 @@ import Select from '@mui/material/Select';
 import {default as SelectReact} from 'react-select'
 import {keysDescription, option } from './keysDefine';
 import Loading from '../Loading';
+import LoadingDialog from '../LoadingDialog'
 import { applyMappingFields, changeMappingFields } from '../Service/dataService';
+import NavButton from './NavButton';
 // import Select from 'react-select'
 // import Select from '@mui/material/Select';
+
+const ExitDialog = (props)=>{
+  const {open, setOpen} = props
+  const handleClose = () =>{
+    setOpen(false);
+  }
+  return(
+  <Dialog
+    open={open}
+    onClose={handleClose}
+  >
+    <DialogTitle>Exit Page</DialogTitle>
+    <DialogContent>Are you sure you want to leave? You haven't applied mapping fields yet. If you leave now, the data will be removed.</DialogContent>
+    <DialogActions>
+      <Button>Cancel</Button>
+      <Button>OK</Button>
+    </DialogActions>
+  </Dialog>)
+}
+
 
 function Overview() {
   // Define state
@@ -31,35 +53,15 @@ function Overview() {
   const [isUpload, setIsUpload] = useState(false);
   const [isMapping, setIsMapping] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMapping, setLoadingMapping] = useState(false);
+  const [warning, setWarning] = useState(false);
   const [file, setFile] = useState("");
   const [type, setType] = useState("");
   const [rows, setRows] = useState([]);
   // Define Ref
   const excelFileInputRef = useRef();
   const textFileInputRef = useRef();
-  // Define data
-  // const option = [
-  //   {value: "Transaction ID", label: "Transaction ID"},
-  //   {value: "Date", label: "Date"},
-  //   {value: "Time", label: "Time"},
-  //   {value: "Customer ID", label: "Customer ID"},
-  //   {value: "Product ID", label: "Product ID"},
-  //   {value: "Product Name", label: "Product Name"},
-  //   {value: "Category", label: "Category"},
-  //   {value: "Quantity", label: "Quantity"},
-  //   {value: "Unit Price", label: "Unit Price"},
-  //   {value: "Total Price", label: "Total Price"},
-  //   {value: "Payment Method", label: "Payment Method"},
-  //   {value: "Store Location", label: "Store Location"},
-  //   {value: "Discount", label: "Discount"},
-  //   {value: "Salesperson ID", label: "Salesperson ID"},
-  //   {value: "Profit Margin", label: "Profit Margin"},
-  //   {value: "Other", label: "Other"},
-  // ];
   // Funtion
-  // const handleClickOpen = () => {
-  //   setOpen(true);
-  // };
   const handleClose = () => {
     setOpen(false);
   };
@@ -115,31 +117,59 @@ function Overview() {
       newMapping[rows[i].name] = rows[i].systemField;
     }
     if (isMapping){
-      const res = await changeMappingFields(newMapping);
-      console.log(res);
-      // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
-      const resData = await getData();
-      setData(resData.data);
-      setColumns(Object.keys(resData.data[0]))
-      // setData(resData.results);
-      // setColumns(Object.keys(resData.results[0]))
+      try {
+        setLoadingMapping(true);
+        const res = await changeMappingFields(newMapping);
+        // console.log(res);
+        // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
+        const resData = await getData();
+        setData(resData.data);
+        setColumns(Object.keys(resData.data[0]))
+        // setData(resData.results);
+        // setColumns(Object.keys(resData.results[0]))
+      }catch(error){
+        console.log(error);
+      }finally{
+        setLoadingMapping(false);
+      }
     }
     else{
-      const res = await applyMappingFields(newMapping);
-      console.log(res);
-      // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
-      const resData = await getData();
-      setData(resData.data);
-      setColumns(Object.keys(resData.data[0]))
-      // setData(resData.results);
-      // setColumns(Object.keys(resData.results[0]))
+      setLoadingMapping(true);
+      try{
+        const res = await applyMappingFields(newMapping);
+        // console.log(res);
+        // setRows(Object.keys(res).map((item) => (createData(item, res[item]))));
+        const resData = await getData();
+        setData(resData.data);
+        setColumns(Object.keys(resData.data[0]))
+        // setData(resData.results);
+        // setColumns(Object.keys(resData.results[0]))
+      }catch(error){
+        console.log(error);
+      }finally{
+        setIsMapping(true);
+        setLoadingMapping(false);
+      }
+
     }
   }
   const handleApply = () => {
-    
     setMapping();
   }
   // When upload file
+  const initBeforeUnLoad = (isMapping, isUpload) => {
+    window.onbeforeunload = (event) => {
+      // Show prompt based on state
+      if (!isMapping&& isUpload) {
+        const e = event || window.event;
+        e.preventDefault();
+        if (e) {
+          e.returnValue = ''
+        }
+        return "Are you sure you want to leave? You haven\'t applied mapping fields yet. If you leave now, the data will be removed.";
+      }
+    };
+  };
   async function getDataFromFile(){
     try{
     var resData = await getData();
@@ -147,12 +177,11 @@ function Overview() {
     setColumns(Object.keys(resData.data[0]))
     // setData(resData.results);
     // setColumns(Object.keys(resData.results[0]))
-
     setIsUpload(true);
-    if (resData){
-      var mappingData = await getMappingFields();
-      setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
-    }
+    // if (resData){
+    //   var mappingData = await getMappingFields();
+    //   setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
+    // }
     }
     catch(error){
       console.log(error);
@@ -168,30 +197,27 @@ function Overview() {
     setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
     getDataFromFile()
   }
-  // useEffect(() => {
-  //   if (file){
-  //     getDataFromFile()
-  //   }
-  // },[file]);
-
-  // Check file is upload or not? 
   useEffect(()=>{
     async function checkFileIsUpload(){
       setLoading(true);
       try{
       var resData = await getData();
-      setData(resData.data);
-      // setData(resData.results);
-      setIsUpload(true);
-      setColumns(Object.keys(resData.data[0]));
-      // setColumns(Object.keys(resData.results[0]))
       if (resData){
         var mappingData = await getMappingFields();
+        setData(resData.data);
+        // setData(resData.results);
+        setIsUpload(true);
+        setIsMapping(true);
+        setColumns(Object.keys(resData.data[0]));
+        // setColumns(Object.keys(resData.results[0]))
         setRows(Object.keys(mappingData).map((item) => (createData(item, mappingData[item]))));
       }
     }
       catch(error){
         console.log(error);
+        if (isUpload) {
+          var res = await deleteData();
+        }
         setIsMapping(false);
       }finally{
         setLoading(false);
@@ -199,9 +225,18 @@ function Overview() {
     }
     checkFileIsUpload();
   },[]);
-  useEffect(()=>{
-    console.log(data)
-  },[data]);
+  window.onload = function() {
+    initBeforeUnLoad(isMapping, isUpload);
+  };
+  useEffect(() => {
+    initBeforeUnLoad(isMapping, isUpload);
+  }, [isMapping, isUpload]);
+  // unstable_usePrompt({
+  //   message: "Are you sure you want to leave? You haven't applied mapping fields yet. If you leave now, the data will be removed.",
+  //   when: ({ currentLocation, nextLocation }) =>
+  //     isMapping ===false && isUpload === true &&
+  //     currentLocation.pathname !== nextLocation.pathname,
+  // });
   return (
     <div className='mx-32 mt-8 min-h-1000'>
       <div className='flex items-center text-deep-blue'>
@@ -218,7 +253,6 @@ function Overview() {
       </div>
 
       {loading? <Loading title="Loading"/> 
-          // Sample table
         :!isUpload?  
         <Box sx={{display: "flex", flexDirection: "column", border:"1px solid", borderStyle:"dotted", margin: "16px 0px", width:"80vw", height:"500px", alignItems:"center", justifyContent:"center", background:"white"}}>
           <div className="text-xl">Add your data in here</div>
@@ -268,7 +302,7 @@ function Overview() {
         :<div className='h-500 w-full my-2 mx-0 flex flex-col'>
             <Stack spacing={2} direction="row">
               <Button variant="contained" onClick={clearData}>Clear Data</Button>
-              <Button variant="contained">Calculate</Button>
+              {/* <Button variant="contained">Calculate</Button> */}
             </Stack>
             <DataGrid
               rows={data}
@@ -333,7 +367,9 @@ function Overview() {
       </>
       :<Loading title="I'm waiting for your data"/>
       }
-      <GetBackToTopButton/>
+      <LoadingDialog open={loadingMapping} message="Waiting us for applying your setting..."/>
+      <NavButton/>
+      {/* <ExitDialog open={warning} setOpen={setWarning}/> */}
     </div>
   )
 }

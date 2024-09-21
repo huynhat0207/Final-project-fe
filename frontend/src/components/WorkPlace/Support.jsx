@@ -11,6 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import NavButton from './NavButton';
 
 const NestedList = (props) => {
   const {question, answer} = props;
@@ -79,12 +80,12 @@ export default function Support() {
   };
   const dataFiltered = filterData(searchQuery, data);
   const SearchQuestionsandAnswer = [
-    {quest: "What is the size of the dataset and how much datea will I need to get from each one?", answer: "Base on the selected work you choose, "},
+    {quest: "What is the size of the dataset and how much data will I need to get from each one?", answer: "Base on the selected work you choose, "},
     {quest: "", answer: ""},
     {quest: "", answer: ""},
   ]
   const FrequencyQuestionsandAnswer = [
-    {quest: "What is the size of the dataset and how much datea will I need to get from each one?", answer: "Base on the selected work you choose, "},
+    {quest: "What is the size of the dataset and how much data will I need to get from each one?", answer: "Base on the selected work you choose, "},
     {quest: "", answer: ""},
     {quest: "", answer: ""},
   ]
@@ -122,6 +123,7 @@ export default function Support() {
         <div className='bubble'/><div className='bubble'/><div className='bubble'/><div className='bubble'/><div className='bubble'/>
         <div className='bubble'/><div className='bubble'/><div className='bubble'/><div className='bubble'/><div className='bubble'/>
       </div>
+      <NavButton/>
     </div>
   )
 }

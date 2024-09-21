@@ -1,7 +1,7 @@
 
 import React from "react"
 import './App.css'
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route, Navigate, BrowserRouter} from "react-router-dom"
 import { Box } from "@mui/material";
 import Home from './components/HomePage.jsx'
 import SignIn from "./components/Auth/SignIn.jsx"
@@ -17,7 +17,6 @@ import Support from "./components/WorkPlace/Support.jsx";
 import Forecasting from "./components/WorkPlace/Forecasting.jsx";
 import Chatbot from "./components/WorkPlace/Chatbot.jsx";
 // import { deleteData } from "./components/Service/dataService.js";
-// import TestPage from "./components/TestPage.jsx"
 
 
 function Logout() {
@@ -41,7 +40,6 @@ function App() {
   return (
     <AuthProvider>
       <Box className="w-screen bg-slate-200 overflow-y-auto">
-      {/* <Header currentPage={pageLocation} />  */}
       <Routes>
         <Route path='/' element={<Navigate to="/home"/>}/>
         <Route path="/login" element={<SignIn />} />

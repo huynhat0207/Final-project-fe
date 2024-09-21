@@ -1,26 +1,19 @@
 import api from "./apiService";
 
-function objectToQueryString(obj) {
-    const keys = Object.keys(obj);
-    const keyValuePairs = keys.map(key => {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
-    });
-    return keyValuePairs.join('&');
-}
-
 export const getData = async (type, isMul = null, func = null, xAxis, yAxis, labelCol = null, filter) =>{
     var jsonFilter;
+    var newData;
     if (type === 'line') {
         if (isMul ==='true'){
             if (filter.length === 0){
                 const res = await LineChartApi(func, xAxis, yAxis, [], labelCol)
-                var newData = res.data.map((item) => ({...item, mode:'lines'}))
+                newData = res.data.map((item) => ({...item, mode:'lines'}))
                 return newData
             }
             else {
                 jsonFilter = JSON.stringify(filter)
                 const res = await LineChartApi(func, xAxis, yAxis, jsonFilter, labelCol)
-                var newData = res.data.map((item) => ({...item, mode:'lines'}))
+                newData = res.data.map((item) => ({...item, mode:'lines'}))
                 return newData
             }
             // var newData = res.data.map((item) => ({...item, mode:'lines'}))
@@ -29,13 +22,13 @@ export const getData = async (type, isMul = null, func = null, xAxis, yAxis, lab
         else {
             if (filter.length === 0){
                 const res = await LineChartApi(func, xAxis, yAxis, [])
-                const newData = res.data.map((item) => ({...item, mode:'lines'}))
+                newData = res.data.map((item) => ({...item, mode:'lines'}))
                 return newData
             }
             else {
                 jsonFilter = JSON.stringify(filter)
                 const res = await LineChartApi(func, xAxis, yAxis, jsonFilter)
-                const newData = res.data.map((item) => ({...item, mode:'lines'}))
+                newData = res.data.map((item) => ({...item, mode:'lines'}))
                 return newData
             }
         }
@@ -181,6 +174,7 @@ export const SingleValueApi = async (func, value, filter) => {
     // const {func, x, y, column} = props
     try {
         const response = await api.get('/api/chart/value/', {params: {function: func, column: value, filter: (filter)}})
+        console.log(response.data)
         return response.data;
     } catch(error){
         console.error('Error loading histogram plot data:', error);

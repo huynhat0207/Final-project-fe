@@ -25,7 +25,7 @@ const AvatarDropdown = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [openProfile, setOpenProfile] = useState(false);
-  const [openSetting, setOpenSetting] = useState(false);
+  // const [openSetting, setOpenSetting] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   function pressProfile() {
@@ -33,11 +33,11 @@ const AvatarDropdown = () => {
     setOpenProfile(true);
     //TODO
   }
-  function pressSetting() {
-    setAnchorEl(null);
-    setOpenSetting(true);
-    //TODO
-  }
+  // function pressSetting() {
+  //   setAnchorEl(null);
+  //   setOpenSetting(true);
+  //   //TODO
+  // }
   function pressLogout(){
     // setAnchorEl(null);
     navigate('/logout');
@@ -124,12 +124,12 @@ const AvatarDropdown = () => {
             <ListItemText>Profile</ListItemText>
           </MenuItem>
           {/* Add function here */}
-          <MenuItem onClick={pressSetting}> 
+          {/* <MenuItem onClick={pressSetting}> 
             <ListItemIcon>
               <SettingsIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText className='text-xl'>Setting</ListItemText>
-          </MenuItem>
+          </MenuItem> */}
           <Divider/>
           <MenuItem onClick={pressLogout}>
             <ListItemIcon>

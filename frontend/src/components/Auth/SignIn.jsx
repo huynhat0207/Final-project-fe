@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import api from "../Service/apiService";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
+import { ACCESS_TOKEN } from "./constants";
 // import LoadingIndicator from "./LoadingIndicator";
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
@@ -9,45 +8,22 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { loginAuth } from "../Service/authService";
 import logo from '../Img/Logo.png'
 
-function evaluatePasswordStrength(password) {
-    const lengthCriteria = password.length >= 12;
-    const lowercaseCriteria = /[a-z]/.test(password);
-    const uppercaseCriteria = /[A-Z]/.test(password);
-    const digitCriteria = /\d/.test(password);
-    const specialCharacterCriteria = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (lengthCriteria && lowercaseCriteria && uppercaseCriteria && digitCriteria && specialCharacterCriteria) {
-        return 'Strong';
-    } else if (lengthCriteria || (lowercaseCriteria && uppercaseCriteria && digitCriteria)) {
-        return 'Medium';
-    } else {
-        return 'Weak';
-    }
-}
 
 function SignIn() {
-    const [name, setName] = useState("");
+    // const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [passwordStrength, setPasswordStrength] = useState('');
     const { setIsAuthorized } = useAuth();
     const handlePasswordChange = (e) => {
         const password = e.target.value;
-        setPasswordStrength(evaluatePasswordStrength(password));
         setPassword(password);
     };
-    function getColor(str){
-        if (str === 'Strong') return 'text-green';
-        else if (str === 'Medium') return 'text-orange';
-        else return 'text-red';
-    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         if (!emailRegex.test(email)) {
             setErrorMessage('Email or password is incorrect.');

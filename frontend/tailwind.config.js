@@ -114,7 +114,27 @@ module.exports = {
             transform: 'scale(1)',
             background: '#0761ff',
           }
-        }
+        },
+        typing: {
+          '0%, 25%': {
+             transform: 'translateY(0px)'
+          },
+          '35%': {
+             transform: 'translateY(5px)'
+          },
+          '45%': {
+             transform: 'translateY(0px)'
+          },
+          '60%': {
+             transform: 'translateY(-5px)'
+          },
+          '75%':{
+             transform: 'translateY(0px)'
+          },
+          '100%': {
+             transform: 'translateY(0px)'
+          }
+       }
       },
       aspectRatio:{
         '6/5': '6 / 5',
