@@ -16,25 +16,31 @@ import Histogram from './Content/Histogram';
 import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined';
 import {Grid, TextField, Button} from '@mui/material';
 import { useCallback } from 'react';
-
+import Chart from './Content/Chart';
 const RenderChart = (props) => {
   const {width, height, type, filter, option, signal} = props;
-  switch (type) {
-    case 'value':
-      return (<SingleValue width={width*100} filter={filter} option={option} signal={signal} />);
-    case 'line':
-      return (<LineChart width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
-    case 'bar':
-      return (<BarChart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
-    case 'pie':
-      return (<PieChart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
-    case 'box':
-      return (<BoxPlot width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
-    case 'histogram':
-      return (<Histogram width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
-    default:
-      return null;
+  if (type === 'value'){
+    return (<SingleValue width={width*100} filter={filter} option={option} signal={signal} />);
   }
+  else {
+    return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+  }
+  // switch (type) {
+  //   case 'value':
+  //     return (<SingleValue width={width*100} filter={filter} option={option} signal={signal} />);
+  //   case 'line':
+  //     return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+  //   case 'bar':
+  //     return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+  //   case 'pie':
+  //     return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+  //   case 'box':
+  //     return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal} />);
+  //   case 'histogram':
+  //     return (<Chart width={width*100} height={height*100} filter={filter} option={option} signal={signal}/>);
+  //   default:
+  //     return null;
+  // }
 }
 
 const WindowedDialog = (props) => {
@@ -94,9 +100,6 @@ function MainContainer(children) {
     // setLayout(layout.filter((val) => val.i !== String(index)).map((item, idx) => ({...item, i:String(idx)})))
     setListOfCharts(listOfCharts.filter((val, i) => i !== index));
   }
-  useEffect(()=>{
-    console.log('Layout',props);
-  },[props]);
   const ChangeSize = (index) => {
     var curLayout = props.layout
     var newLayout = curLayout.map((val) => (val.i === String(index))? {...val, w: parseInt(w), h: parseInt(h) } :val);

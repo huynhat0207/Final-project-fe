@@ -22,7 +22,6 @@ function PieChart(props) {
       layout ={{
         height: height - 65,
         width: width - 20,
-        grid:{rows: 1, columns: 2}
       }}
     />
     </div>

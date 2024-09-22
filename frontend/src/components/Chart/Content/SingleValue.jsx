@@ -5,7 +5,7 @@ function SingleValue(props) {
   const {width, filter, option, signal} = props;
   const [dataChart, setDataChart] = useState(null);
   useEffect(()=>{
-    async function fetchDate(){
+    async function fetchData(){
       try{
         const resData = await getData(option.type, option.isMul, option.func, option.xAxis, option.yAxis, option.labelCol, filter);
         setDataChart(resData.value);
@@ -13,7 +13,7 @@ function SingleValue(props) {
         console.log(error);
       }
     }
-    fetchDate();
+    fetchData();
   },[signal]);
   return (
     <div className='text-3xl font-bold text-center text-dark-blue' style={{width: width - 20, height:'35px'}}>{dataChart}</div>

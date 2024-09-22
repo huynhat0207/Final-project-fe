@@ -166,7 +166,6 @@ function Dashboard() {
     } = event;
     var ft;
     if (isMin){
-      // var temp = filterColumns;
       ft = filterColumns[index].from_to;
       ft[0] = value;
       setFilterColumns(filterColumns.map((item, idx) => ( idx === index)? {...item, from_to: ft } : item ))
@@ -199,21 +198,20 @@ function Dashboard() {
     }
     getFields();
   },[]);
-  // useEffect(()=>{
-  //   console.log(props)
-  // },[props])
-  // useEffect(()=>{
-  //   console.log(filterColumns);
-  // },[filterColumns])
-  // useEffect(()=>{
-  //   function fetchJSONData() {
-  //     var data = require('./test.json');
-  //     console.log(data);
-  //     setListOfCharts(data.list)
-  //     setLayout(data.layout)
-  //   }
-  //   fetchJSONData()
-  // },[])
+  useEffect(()=>{
+    const p = JSON.parse(localStorage.getItem('props'));
+    const l = JSON.parse(localStorage.getItem('list'));
+    if (p) {
+      setProps(p);
+      setListOfCharts(l);
+    }
+  },[])
+  useEffect(()=>{
+    setTimeout(()=>{
+      localStorage.setItem('props', JSON.stringify(props));
+      localStorage.setItem('list', JSON.stringify(listOfCharts));
+    },2000)
+  },[props, listOfCharts]);
   return (
     <div className='mx-32 mt-8 min-h-1000'>
       <div className='flex items-center text-deep-blue'>
