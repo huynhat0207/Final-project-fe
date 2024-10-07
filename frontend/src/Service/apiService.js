@@ -1,5 +1,5 @@
 import axios from "axios"
-import { ACCESS_TOKEN } from "../Auth/constants"
+import { ACCESS_TOKEN } from "../components/Auth/constants"
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';

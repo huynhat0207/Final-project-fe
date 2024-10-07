@@ -5,11 +5,11 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import SendIcon from '@mui/icons-material/Send';
 import Typing from '../Animation/Typing';
 import ReactMarkdown from 'react-markdown';
-import { getChatMessage, createNewMessage, sendMessage } from '../Service/chatService';
+import { getChatMessage, createNewMessage, sendMessage } from '../../Service/chatService';
 import botImage from '../Img/bot.jpg'
 
 const TextInput = (props) =>{
-    const {isChat, setMessages, waiting, setWaiting, message, setMessage} = props;
+    const {isChat, setIsChat, setMessages, waiting, setWaiting, message, setMessage} = props;
     // const [message, setMessage] = useState(null);
     async function sendApi(message){
       if (isChat){
@@ -34,6 +34,7 @@ const TextInput = (props) =>{
             setMessage('');
             const res2 = await getChatMessage();
             setMessages(res2);
+            setIsChat(true);
           }
         }catch(error){
           console.log(error);
@@ -103,7 +104,6 @@ function MiniChatbot() {
     const [message, setMessage] = React.useState(null);
     const [isChat, setIsChat] = React.useState(false);
     const [waiting, setWaiting] = React.useState(false);
-    // const [isChat]
     useEffect(()=>{
         async function getChat(){
           try {
@@ -111,7 +111,7 @@ function MiniChatbot() {
             setMessages(res);
             setIsChat(true);
           }catch(error){
-            if (error.data.message === "Does not exist this conversation"){
+            if (error.response.data.message === "Does not exist this conversation"){
               setIsChat(false);
             }
           }
@@ -141,7 +141,7 @@ function MiniChatbot() {
                         </>)}
                     </Paper>
                     {/* <Divider/> */}
-                    <div className='self-end w-full flex-initial'><TextInput isChat={isChat} setMessages={setMessages} waiting={waiting} setWaiting={setWaiting} message={message} setMessage={setMessage} /></div>
+                    <div className='self-end w-full flex-initial'><TextInput isChat={isChat} setIsChat={setIsChat} setMessages={setMessages} waiting={waiting} setWaiting={setWaiting} message={message} setMessage={setMessage} /></div>
                 </Box>
             </div>
             :<div className='flex'>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect} from 'react'
 import {Link} from 'react-router-dom'
 import HomeIcon from '@mui/icons-material/Home'
 import Select from '@mui/material/Select';
@@ -18,13 +18,14 @@ import { sampleFields } from './keysDefine';
 import InsightsIcon from '@mui/icons-material/Insights';
 import Plot from 'react-plotly.js';
 import {Card, CardContent, Typography} from '@mui/material';
-import { forecastData } from '../Service/analysisService';
+import { forecastData } from '../../Service/analysisService';
 import Loading from '../Loading';
 import LoadingDialog from '../LoadingDialog';
-import { getColumns } from '../Service/dataService';
-import { SingleValueApi } from '../Service/chartService';
+import { getColumns } from '../../Service/dataService';
+import { SingleValueApi } from '../../Service/chartService';
 import CircularProgress from '@mui/material/CircularProgress';
 import NavButton from './NavButton';
+import Footer from '../Footer/Footer';
 const FilterDialog = (props) =>{
     // Define state
     const {open, setOpen, filter, setFilter} = props;
@@ -164,6 +165,7 @@ function Forecasting() {
                     setMae(res.mae);
                     setValue(res.value);
                     setIsApply(true);
+                    console.log('Model: ',res.model_name)
                 }
             }
             else {
@@ -177,6 +179,7 @@ function Forecasting() {
                     setMae(res.mae);
                     setValue(res.value);
                     setIsApply(true);
+                    console.log('Model: ',res.model_name)
                 }
             }
         }catch(e){
@@ -193,7 +196,7 @@ function Forecasting() {
     // },[])
     return (
         <>
-        <div className='mx-32 mt-8 min-h-1000'>
+        <div className='mx-32 mt-8 min-h-1000 flex flex-col'>
             <div className='flex items-center text-deep-blue'>
                 <Link to='../home' ><HomeIcon/></Link>
                 <span className='font-bold px-1 font-mono'> &gt; </span>
@@ -213,7 +216,7 @@ function Forecasting() {
                 flexWrap='wrap'
                 sx={{paddingTop: 2}} 
             >
-                <Grid item xs={2} sm={4} md={4} key="recency">
+                <Grid item xs={2} sm={4} md={4} key="numsDays">
                 <div className='bg-white rounded-lg p-1 h-full'>
                     <div className="font-bold pl-1">Number of days to forecast: </div>
                         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
@@ -288,9 +291,11 @@ function Forecasting() {
                     </div>
                 </Grid>
             </Grid>
-            <Button variant='contained' sx={{marginTop: 1}} onClick={submitForecast}>
-                Apply
-            </Button>
+            <div>
+                <Button variant='contained' sx={{marginTop: 1}} onClick={submitForecast}>
+                    Apply
+                </Button>
+            </div>
             <div className='flex text-vivid-blue mt-2'>
                 <AssessmentIcon sx={{height:"auto", width:"36px"}} />
                 <h2 className=" font-sans text-3xl font-bold"> Forecasting Result</h2>
@@ -327,7 +332,7 @@ function Forecasting() {
                         sx={{paddingTop: 2, width:'70%'}}
 
                     >
-                        <Grid item xs={3} sm={6} md={6} key="recency">
+                        <Grid item xs={3} sm={6} md={6} key="mse">
                             <Card>
                                 <CardContent>
                                     <Typography color="textSecondary" gutterBottom variant="body2" sx={{fontWeight: 600, color:'#813b80'}}>
@@ -339,7 +344,7 @@ function Forecasting() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={3} sm={6} md={6} key="recency">
+                        <Grid item xs={3} sm={6} md={6} key="mae">
                             <Card>
                                 <CardContent>
                                     <Typography gutterBottom variant="body2" sx={{fontWeight: 600, color: '#101079'}}>
@@ -395,6 +400,9 @@ function Forecasting() {
             </>:
             <Loading title="I'm waiting for you to apply" />
         }
+        <div className='items-end mt-auto'>
+            <Footer/>
+        </div>
         </div>
         <LoadingDialog open={loading} message='Please wait as this may take a few minutes...'/>
         <FilterDialog open={open} setOpen={setOpen} filter={filter} setFilter={setFilter} />

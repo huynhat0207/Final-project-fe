@@ -4,15 +4,16 @@ import HomeIcon from '@mui/icons-material/Home';
 import {Paper, Button, Box, Stack, Chip, Avatar } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
-import FaceIcon from '@mui/icons-material/Face'; 
+// import FaceIcon from '@mui/icons-material/Face'; 
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { getChatMessage, createNewMessage, sendMessage } from '../Service/chatService';
+import { getChatMessage, createNewMessage, sendMessage } from '../../Service/chatService';
 import botImage from '../Img/bot.jpg'
 import ReactMarkdown from 'react-markdown';
 import Typing from '../Animation/Typing';
+import Footer from '../Footer/Footer';
 // import Stack from '@mui/material';
 const TextInput = (props) =>{
-  const {isChat, setMessages, waiting, setWaiting, message, setMessage} = props;
+  const {isChat, setIsChat, setMessages, waiting, setWaiting, message, setMessage} = props;
   // const [message, setMessage] = useState(null);
   async function sendApi(message){
     if (isChat){
@@ -37,6 +38,7 @@ const TextInput = (props) =>{
           setMessage('');
           const res2 = await getChatMessage();
           setMessages(res2);
+          setIsChat(true);
         }
       }catch(error){
         console.log(error);
@@ -102,22 +104,22 @@ function Chatbot() {
   const [messages, setMessages] = useState([]);
   const [waiting, setWaiting] = useState(false);
   const [message, setMessage] = useState(null)
-  // useEffect(()=>{
-  //   async function getChat(){
-  //     try {
-  //       const res = await getChatMessage();
-  //       setMessages(res);
-  //       setIsChat(true);
-  //     }catch(error){
-  //       if (error.data.message === "Does not exist this conversation"){
-  //         setIsChat(false);
-  //       }
-  //     }
-  //   }
-  //   getChat();
-  // },[]);
+  useEffect(()=>{
+    async function getChat(){
+      try {
+        const res = await getChatMessage();
+        setMessages(res);
+        setIsChat(true);
+      }catch(error){
+        if (error.response.data.message === "Does not exist this conversation"){
+          setIsChat(false);
+        }
+      }
+    }
+    getChat();
+  },[]);
   return (
-    <div className='mx-32 mt-8 min-h-1000'>
+    <div className='mx-32 mt-8 min-h-1000 flex flex-col'>
         <div className='flex items-center text-deep-blue'>
             <Link to='../home' ><HomeIcon/></Link>
             <span className='font-bold px-1 font-mono'> &gt; </span>
@@ -134,7 +136,7 @@ function Chatbot() {
           {!isChat?
           <>
             <div className="text-4xl font-bold mb-5">How can I help you?</div>
-            <div className='w-3/5'><TextInput isChat={isChat} setMessages={setMessages} /></div>
+            <div className='w-3/5'><TextInput isChat={isChat} setIsChat={setIsChat} setMessages={setMessages} waiting={waiting} setWaiting={setWaiting} message={message} setMessage={setMessage}/></div>
             {/* <Stack direction="row" spacing={1} sx={{paddingTop:2}}>
                 <Chip icon={<FaceIcon />} label="Summarize"/>
                 <Chip icon={<FaceIcon />} label="Brainstorm"/>
@@ -152,10 +154,14 @@ function Chatbot() {
                       <MessageUser message={item.user_response}/>
                   </>)}
                 </Paper>
-                <div className='self-end w-full flex-initial'><TextInput isChat={isChat} setMessages={setMessages} waiting={waiting} setWaiting={setWaiting} message={message} setMessage={setMessage} /></div>
+                <div className='self-end w-full flex-initial'><TextInput isChat={isChat} setIsChat={setIsChat} setMessages={setMessages} waiting={waiting} setWaiting={setWaiting} message={message} setMessage={setMessage} /></div>
             </Paper>}
         </Paper>
+        <div className='items-end mt-auto'>
+          <Footer/>
+        </div>
     </div>
+    
   )
 }
 

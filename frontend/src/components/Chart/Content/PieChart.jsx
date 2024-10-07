@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import Plot from 'react-plotly.js'
-import { getData } from "../../Service/chartService";
+import { getData } from "../../../Service/chartService";
 function PieChart(props) {
   const {data, width, height, filter, option, signal} = props;
   const [dataChart, setDataChart] = useState([]);

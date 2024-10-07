@@ -10,7 +10,7 @@ import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '
 import {Dialog, DialogTitle, DialogContent, DialogActions} from '@mui/material/';
 import HomeIcon from '@mui/icons-material/Home';
 import { DataGrid} from '@mui/x-data-grid';
-import { loadData, getData, getMappingFields, deleteData } from '../Service/dataService';
+import { loadData, getData, getMappingFields, deleteData, applyMappingFields, changeMappingFields } from '../../Service/dataService';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,8 +20,8 @@ import {default as SelectReact} from 'react-select'
 import {keysDescription, option } from './keysDefine';
 import Loading from '../Loading';
 import LoadingDialog from '../LoadingDialog'
-import { applyMappingFields, changeMappingFields } from '../Service/dataService';
 import NavButton from './NavButton';
+import Footer from '../Footer/Footer';
 // import Select from 'react-select'
 // import Select from '@mui/material/Select';
 
@@ -69,6 +69,8 @@ function Overview() {
     deleteData();
     setData([]);
     setIsUpload(false);
+    localStorage.removeItem("props");
+    localStorage.removeItem("list");
   };
   function createData(name, systemField) {
     return { name, systemField};
@@ -238,7 +240,7 @@ function Overview() {
   //     currentLocation.pathname !== nextLocation.pathname,
   // });
   return (
-    <div className='mx-32 mt-8 min-h-1000'>
+    <div className='mx-32 mt-8 min-h-1000 flex flex-col'>
       <div className='flex items-center text-deep-blue'>
         <Link to='../home' ><HomeIcon/></Link>
         <span className='font-bold px-1 font-mono'> &gt; </span>
@@ -278,7 +280,7 @@ function Overview() {
                 value={type}
                 labelId="type-select-label"
                 id="type-select"
-                label="Type"
+                label="Input File Type"
                 onChange={(e)=>{setType(e.target.value)}}
                 >
                   <MenuItem value="">None</MenuItem>
@@ -293,7 +295,7 @@ function Overview() {
             {type==='csv' && <input type='file' ref={textFileInputRef} onChange={handleFileChange} accept='text/csv'/>}
             </DialogContent>
             <DialogActions>
-            <Button autoFocus onClick={submitFile}>
+            <Button autoFocus onClick={submitFile} variant='outlined'>
               Upload
             </Button>
           </DialogActions>
@@ -363,13 +365,18 @@ function Overview() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button variant='contained' onClick={handleApply}>Apply</Button>
+      <div>
+        <Button variant='contained' onClick={handleApply} >Apply</Button>
+      </div>
       </>
       :<Loading title="I'm waiting for your data"/>
       }
       <LoadingDialog open={loadingMapping} message="Waiting us for applying your setting..."/>
       <NavButton/>
       {/* <ExitDialog open={warning} setOpen={setWarning}/> */}
+      <div className='items-end mt-auto'>
+        <Footer/>
+      </div>
     </div>
   )
 }

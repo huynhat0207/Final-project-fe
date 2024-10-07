@@ -17,7 +17,7 @@ import Support from "./components/WorkPlace/Support.jsx";
 import Forecasting from "./components/WorkPlace/Forecasting.jsx";
 import Chatbot from "./components/WorkPlace/Chatbot.jsx";
 // import { deleteData } from "./components/Service/dataService.js";
-
+import TestPage from "./components/TestPage.jsx";
 
 function Logout() {
   localStorage.clear();
@@ -49,7 +49,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             {/* Protected routes */}
             {mainList.map((item) => <Route key={item.id} path={item.path} element={<ProtectedRoute>{item.element}</ProtectedRoute>} />)}
-            {/* <Route path="/test" element={<TestPage />} /> */}
+            <Route path="/test" element={<TestPage />} />
             {/* Not found route */}
             <Route path="*" element={<NotFound />} />
           </Route>

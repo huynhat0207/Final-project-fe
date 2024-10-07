@@ -196,7 +196,9 @@ function HomePage() {
                 <div className="font-sans grow basis-auto">Data&Retailer</div>
                 <div className="font-sans grow basis-auto">Data&Retailer , 2024 © All Rights Reserved</div>
             </div>
-            <GetBackToTopButton/>
+            <div className='fixed bottom-0 right-5 z-50'>
+                <GetBackToTopButton/>
+            </div>
         </div>
     );
 }

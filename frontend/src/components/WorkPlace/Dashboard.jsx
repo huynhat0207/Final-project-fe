@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import { Button, Dialog, InputLabel} from '@mui/material';
@@ -18,17 +18,19 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import CloseIcon from '@mui/icons-material/Close';
 import Checkbox from '@mui/material/Checkbox';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import {IconButton} from '@mui/material';
-import { getMappingFields } from '../Service/dataService';
+import { getMappingFields } from '../../Service/dataService';
 import { keysApi } from './keysDefine';
 import ListItemText from '@mui/material/ListItemText';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import { SingleValueApi } from '../Service/chartService';
+import { SingleValueApi } from '../../Service/chartService';
 import TextField from '@mui/material/TextField';
 import FileNotFound from './FileNotFound';
-import MiniChatbot from './MiniChatbot';
 import NavButton from './NavButton';
-
+import { exportComponentAsPDF } from 'react-component-export-image';
+import Footer from '../Footer/Footer';
+import LoadingDialog from '../LoadingDialog'
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -110,7 +112,6 @@ const FilterDialog = (props) => {
     </DialogActions>
   </Dialog>)
 }
-
 function Dashboard() {
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -120,11 +121,30 @@ function Dashboard() {
   const [filterColumns, setFilterColumns] = useState([]);
   const [listOfCharts, setListOfCharts] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [loading, setLoading] = useState(false);
+  // const [jsonFile, setJsonFile] = useState([]);
+  const exportPDF = useRef();
+  const importJson = useRef();
   const [props, setProps] = useState(
     {
       layout:[],
     }
   );
+  function exportToPDF(){
+    exportComponentAsPDF(exportPDF, {pdfOptions: {w:50, h:50}});
+  }
+  function onReaderLoad(event){
+    var obj = JSON.parse(event.target.result);
+    if (obj){
+      setProps(obj.props);
+      setListOfCharts(obj.list);
+    }
+  }
+  function onChange(event) {
+    var reader = new FileReader();
+    reader.onload = onReaderLoad;
+    reader.readAsText(event.target.files[0]);
+  }
 
   function clearAll(){
     setListOfCharts([]);
@@ -133,7 +153,11 @@ function Dashboard() {
     })
   };
   async function applyFilter(){
+    setLoading(true);
     setSignal(!signal);
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
   }
   const handleChange = (event, index, type) => {
     if (type === 'include'){
@@ -213,7 +237,8 @@ function Dashboard() {
     },2000)
   },[props, listOfCharts]);
   return (
-    <div className='mx-32 mt-8 min-h-1000'>
+    <>
+    <div className='mx-32 mt-8 min-h-1000 flex flex-col'>
       <div className='flex items-center text-deep-blue'>
         <Link to='../home' ><HomeIcon/></Link>
         <span className='font-bold px-1 font-mono'> &gt; </span>
@@ -229,8 +254,13 @@ function Dashboard() {
       <div className=' flex gap-x-2 mt-2'>
           <Button size='small' variant='contained' onClick={()=>setOpen(true)}> <AddIcon/> Add Visualization</Button> 
           <Button size='small' variant='contained' onClick={()=>clearAll()}> <ClearIcon/> Clear All</Button>
-          <Button size='small' variant='contained'> <GetAppIcon/> Export</Button>
+          <Button size='small' variant='contained' onClick={() => importJson.current.click()}> <FileUploadOutlinedIcon/>Import</Button>
+          <Button size='small' variant='contained' 
+          href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify({props: props, list: listOfCharts}))}`}
+            download="filename.json"> 
+            <GetAppIcon/>Export</Button>
           <Button size='small' variant='contained' onClick={()=>setOpenDialog(true)} > <FilterAltIcon/> Add Filter</Button>
+          <input id="jsonfile" ref={importJson} type="file" onChange={(e) => onChange(e)} hidden/>
           {filterColumns.map((val, index)=> 
             (val.type === 'include')? 
               <FormControl size='small' sx={{ width: 200}}>
@@ -278,10 +308,10 @@ function Dashboard() {
             </>
             :null
         )}
-        {filterColumns.length !==0 && <Button onClick={()=>applyFilter()}>Apply</Button>}
-        {filterColumns.length !==0 && <Button onClick={() => {setFilterColumns([]); setSignal(!signal);}}>Remove</Button>}
+        {filterColumns.length !==0 && <Button variant='outlined' onClick={()=>applyFilter()}>Apply</Button>}
+        {filterColumns.length !==0 && <Button variant='outlined' onClick={() => {setFilterColumns([]); setSignal(!signal);}}>Remove</Button>}
       </div>
-      <div className='relative mt-2'>
+      <div className='relative mt-2 bg-inherit' ref={exportPDF}>
         <ResponsiveReactGridLayout  
             rowHeight={100} 
             className="layout"
@@ -299,11 +329,16 @@ function Dashboard() {
             )}
           </ResponsiveReactGridLayout>
         </div>
-      <FormDialog title="Add Visualization" open={open} setOpen={setOpen} listOfCharts={listOfCharts} setListOfCharts={setListOfCharts} type='add' listCols={columns}/>
-      <FilterDialog columns={columns} openDialog={openDialog} setOpenDialog={setOpenDialog} cur={cur} setCur={setCur} filterColumns={filterColumns} setFilterColumns={setFilterColumns}/>
-      <FileNotFound open={openWarning} setOpen={setOpenWarning}/>
-      <NavButton/>      
+        <div className='items-end mt-auto'>
+          <Footer/>
+        </div>
     </div>
+    <FormDialog title="Add Visualization" open={open} setOpen={setOpen} listOfCharts={listOfCharts} setListOfCharts={setListOfCharts} type='add' listCols={columns}/>
+    <FilterDialog columns={columns} openDialog={openDialog} setOpenDialog={setOpenDialog} cur={cur} setCur={setCur} filterColumns={filterColumns} setFilterColumns={setFilterColumns}/>
+    <FileNotFound open={openWarning} setOpen={setOpenWarning}/>
+    <NavButton/>   
+    <LoadingDialog open={loading} message="Waiting us for applying your filter..."/>
+    </>
   )
 }
 

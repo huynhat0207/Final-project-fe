@@ -1,6 +1,6 @@
 import React, {useEffect, useState, memo} from "react";
 import Plot from 'react-plotly.js'
-import { getData } from "../../Service/chartService";
+import { getData } from "../../../Service/chartService";
 
 function LineChart(props) {
   const {width, height, filter, option, signal} = props;

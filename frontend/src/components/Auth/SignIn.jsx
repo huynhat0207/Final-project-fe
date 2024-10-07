@@ -5,7 +5,7 @@ import { ACCESS_TOKEN } from "./constants";
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
-import { loginAuth } from "../Service/authService";
+import { loginAuth } from "../../Service/authService";
 import logo from '../Img/Logo.png'
 
 

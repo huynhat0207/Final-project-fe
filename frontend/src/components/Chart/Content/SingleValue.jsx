@@ -1,5 +1,5 @@
 import React, {useEffect, useState, memo} from 'react';
-import { getData } from '../../Service/chartService';
+import { getData } from '../../../Service/chartService';
 
 function SingleValue(props) {
   const {width, filter, option, signal} = props;
